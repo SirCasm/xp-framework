@@ -34,6 +34,29 @@
     }
 
     /**
+     * Writes protected members to public members to allow
+     * serialization
+     */
+    public function __sleep() {
+      $this->bucket = $this->_buckets;
+      $this->hash = $this->_hash;
+      return array('hash', 'bucket');
+    }
+
+    /**
+     * Writes temporary public variables back to their origin
+     * to allow deserialization
+     */
+    public function __wakeup() {
+      $this->_hash = $this->hash;
+      unset($this->hash);
+      $this->_buckets = $this->bucket;
+      unset($this->bucket);
+    } 
+
+
+
+    /**
      * list[]= overloading
      *
      * @param   K offset
