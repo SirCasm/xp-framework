@@ -220,7 +220,7 @@
 
       // Introspect array to check if this is actually an object
       if (!empty($array['__jsonclass__']) && !empty($array['__xpclass__'])) {
-        $inst= XPClass::forName($array['__xpclass__'])->newInstance();
+        $inst= Type::forName($array['__xpclass__'])->newInstance();
         
         foreach ($array as $key => $value) {
 
