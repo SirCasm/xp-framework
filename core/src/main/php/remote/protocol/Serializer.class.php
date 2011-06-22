@@ -14,6 +14,7 @@
     'remote.protocol.DoubleMapping',
     'remote.protocol.IntegerMapping',
     'remote.protocol.HashmapMapping',
+    'remote.protocol.HashTableMapping',
     'remote.protocol.ArrayListMapping',
     'remote.protocol.ExceptionMapping',
     'remote.protocol.StackTraceElementMapping',
@@ -22,6 +23,7 @@
     'remote.UnknownRemoteObject',
     'remote.ExceptionReference',
     'remote.ClassReference',
+    'util.collections.HashTable',
     'lang.Enum'
   );
 
@@ -57,6 +59,7 @@
       $this->mappings['e']= new ExceptionMapping();
       $this->mappings['t']= new StackTraceElementMapping();
       $this->mappings['Y']= new ByteArrayMapping();
+      $this->mappings['M']= new HashTableMapping();
       
       // A hashmap doesn't have its own token, because it'll be serialized
       // as an array. We use HASHMAP as the token, so it will never match
@@ -78,6 +81,7 @@
      * @throws  lang.FormatException if an error is encountered in the format 
      */  
     public function representationOf($var, $ctx= array()) {
+
       switch ($type= xp::typeOf($var)) {
         case '<null>': case 'NULL': 
           return 'N;';
@@ -121,6 +125,8 @@
           return $s.'}';
         }
 
+
+
         default: 
           throw new FormatException('Cannot serialize unknown type '.$type);
       }
@@ -140,16 +146,27 @@
         return $this->_classMapping[$var->getClassName()];
       }
       
+      if ($var->getClass()->isGeneric()) {
+        $xpclass = $var->getClass();
+        if ($xpclass->isGeneric()) {
+          var_dump($xpclass->genericDefinition()->getName());
+        }
+      }
+
       // Find most suitable mapping by calculating the distance in the inheritance
       // tree of the object's class to the class being handled by the mapping.
       $cinfo= array();
       foreach (array_keys($this->mappings) as $token) {
         $class= $this->mappings[$token]->handledClass();
-        if (!is($class->getName(), $var)) continue;
+
+        if (!is($class->getName(), $var) && !$var->getClass()->isGeneric()) continue;
         
         $distance= 0; $objectClass= $var->getClass();
+
+        if ($objectClass->isGeneric()) {
+          $objectClass= $objectClass->genericDefinition();
+        }
         do {
-        
           // Check for direct match
           if ($class->getName() != $objectClass->getName()) $distance++;
         } while (0 < $distance && NULL !== ($objectClass= $objectClass->getParentClass()));

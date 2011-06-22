@@ -143,6 +143,24 @@
         $this->serializer->representationOf($var= array('More', 'Power'))
       );
     }
+    
+    /**
+     * Test Serialization of a generic HashTable
+     *
+     *
+     */
+    #[@test]
+    public function representationOfGenericHashTable() {
+      $hashmap = create('new HashTable<string, string>');
+      $hashmap->put('keyone', 'valueone');
+      $hashmap->put('keytwo', 'valuetwo');
+      $hashmap->put('keythree', 'valuethree');
+
+      $this->assertEquals(
+        'M[s;s]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
+        $this->serializer->representationOf($hashmap)
+      );
+    }
 
     /**
      * Test serialization of a date object
