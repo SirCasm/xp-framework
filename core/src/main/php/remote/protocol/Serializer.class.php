@@ -146,13 +146,6 @@
         return $this->_classMapping[$var->getClassName()];
       }
       
-      if ($var->getClass()->isGeneric()) {
-        $xpclass = $var->getClass();
-        if ($xpclass->isGeneric()) {
-          var_dump($xpclass->genericDefinition()->getName());
-        }
-      }
-
       // Find most suitable mapping by calculating the distance in the inheritance
       // tree of the object's class to the class being handled by the mapping.
       $cinfo= array();

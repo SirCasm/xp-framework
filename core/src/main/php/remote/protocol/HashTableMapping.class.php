@@ -59,7 +59,6 @@
 
     public function serializeContent($serializer, $hashmap) {
       $serialized = '';
-      var_dump('key', $hashmap->keys());
       foreach ($hashmap->keys() as $key) {
         $serialized .= $serializer->representationOf($key).$serializer->representationOf($hashmap->get($key));
       }
