@@ -147,7 +147,6 @@
     /**
      * Test Serialization of a generic HashTable
      *
-     *
      */
     #[@test]
     public function representationOfGenericHashTable() {
@@ -160,6 +159,14 @@
         'M[s;s]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
         $this->serializer->representationOf($hashmap)
       );
+
+      $hashmap = create('new HashTable<HashTable<string, HashTable<string,string>>, HashTable<integer,string>>');
+      $this->assertEquals(
+        'M[M[s;M[s;s]];M[i;s]]:0:{}',
+        $this->serializer->representationOf($hashmap)
+      );
+
+
     }
 
     /**
