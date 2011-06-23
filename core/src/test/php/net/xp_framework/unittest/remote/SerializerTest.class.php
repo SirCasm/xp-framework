@@ -166,6 +166,23 @@
         $this->serializer->representationOf($hashmap)
       );
 
+      $hashmap= create('new HashTable<string, HashTable<string, integer>>');
+      $innerHashMap = create('new HashTable<string, integer>');
+      $innerHashMap->put('test', 1);
+      $innerHashMap->put('test2', 7);
+      $innerHashMap->put('test3', 6);
+      $innerHashMap->put('test4', 5);
+      $innerHashMap->put('test5', 4);
+      $innerHashMap->put('test6', 3);
+      $hashmap->put('test', $innerHashMap);
+
+      $this->assertEquals(
+        'M[s;M[s;i]]:1:{s:4:"test";M[s;i]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
+        $this->serializer->representationOf($hashmap)
+      );
+           
+
+
 
     }
 
