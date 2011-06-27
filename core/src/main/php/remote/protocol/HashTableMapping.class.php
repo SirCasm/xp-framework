@@ -46,8 +46,12 @@
       $classString = $this->typeFor($serialized);
       $newInstance = Type::forName($classString)->newInstance();
       $size = $serialized->consumeSize();
-      
-      var_dump($serialized); 
+      $serialized->consumeCharacter('{'); 
+      for ($i = 0; $i < $size; $i++) {
+        $key = $serializer->valueOf($serialized);
+        $value = $serializer->valueOf($serialized);
+        $newInstance->put($key, $value);
+      }
 
       return $newInstance; 
     }
@@ -74,6 +78,9 @@
         case 'O':
           $size = $serialized->consumeSize();
           $classString = $serialized->consumeString();
+          if ($serialized->getCharacter() == ']') {
+            $serialized->consumeCharacter(']');
+          }
           if ($serialized->getCharacter() == ':') {
             $serialized->consumeCharacter(':');
           }
@@ -129,8 +136,6 @@
       foreach ($hashmap->keys() as $key) {
         $serialized .= $serializer->representationOf($key);
         $serialized .= $serializer->representationOf($hashmap->get($key));
-        $serialized = rtrim($serialized, ';');
-        $serialized .= ';';
       }
       return $serialized;
     }

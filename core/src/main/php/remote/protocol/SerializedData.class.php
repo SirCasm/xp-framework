@@ -61,9 +61,10 @@
     public function consumeCharacter($chr) {
       if ($this->buffer{$this->offset} == $chr) {
         $this->offset++;
+        return;
       }
 
-      throw new IllegalStateException(printf('Expected "%s" character, found "%s" instead', $chr, $this->buffer{0}));
+      throw new IllegalStateException(sprintf('Expected "%s" character, found "%s" instead', $chr, $this->buffer{$this->offset}));
       
     }
 
@@ -96,11 +97,7 @@
     }
 
     public function getCharacter($i = 0) {
-      return substr(
-        $this->buffer, 
-        $this->offset + $i, 
-        1
-      );
+      return $this->buffer{$this->offset + $i};
     }
 
     /**

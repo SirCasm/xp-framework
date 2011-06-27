@@ -300,7 +300,7 @@
         }
 
         case 's': {     // strings
-          $value= $serialized->consumeString();
+          $value= new String($serialized->consumeString());
           return $value;
         }
 
