@@ -177,13 +177,9 @@
       $hashmap->put('test', $innerHashMap);
 
       $this->assertEquals(
-        'M[s;M[s;i]]:1:{s:4:"test";M[s;i]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
+        'M[s;M[s;i]]:1:{s:4:"test";M[s;i]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;};}',
         $this->serializer->representationOf($hashmap)
       );
-           
-
-
-
     }
 
     /**

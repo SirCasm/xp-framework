@@ -58,6 +58,51 @@
       return $v;
     }
 
+    public function consumeCharacter($chr) {
+      if ($this->buffer{$this->offset} == $chr) {
+        $this->offset++;
+      }
+
+      throw new IllegalStateException(printf('Expected "%s" character, found "%s" instead', $chr, $this->buffer{0}));
+      
+    }
+
+    /**
+     * Consume everything up to the next "[" and return it
+     * 
+     * @param   string stop
+     * @return  string
+     */     
+    public function consumeType() {
+       $v= substr(
+        $this->buffer, 
+        $this->offset, 
+        strpos($this->buffer, '[', $this->offset)- $this->offset
+      ); 
+     
+      $this->offset+= strlen($v)+ 1;  // +1 to set the marker behind
+      return $v;
+    }
+
+    public function consumeTypeEnd() {
+       $v= substr(
+        $this->buffer, 
+        $this->offset, 
+        strpos($this->buffer, ']', $this->offset)- $this->offset
+      ); 
+     
+      $this->offset+= strlen($v)+ 1;  // +1 to set the marker behind
+      return $v;
+    }
+
+    public function getCharacter($i = 0) {
+      return substr(
+        $this->buffer, 
+        $this->offset + $i, 
+        1
+      );
+    }
+
     /**
      * Consume everything up to the next ":" character and return it
      * 

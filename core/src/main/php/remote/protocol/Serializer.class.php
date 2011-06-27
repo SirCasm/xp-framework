@@ -307,24 +307,24 @@
         case 'a': {     // arrays
           $a= array();
           $size= $serialized->consumeSize();
-          $serialized->offset++;  // Opening "{"
+          $serialized->consumeCharacter('{');
           for ($i= 0; $i < $size; $i++) {
             $key= $this->valueOf($serialized, $context);
             $a[$key]= $this->valueOf($serialized, $context);
           }
-          $serialized->offset++;  // Closing "}"
+          $serialized->consumeCharacter('}');
           return $a;
         }
 
         case 'E': {     // generic exceptions
           $instance= new ExceptionReference($serialized->consumeString());
           $size= $serialized->consumeSize();
-          $serialized->offset++;  // Opening "{"
+          $serialized->consumeCharacter('{');
           for ($i= 0; $i < $size; $i++) {
             $member= $this->valueOf($serialized, $context);
             $instance->{$member}= $this->valueOf($serialized, $context);
           }
-          $serialized->offset++; // Closing "}"
+          $serialized->consumeCharacter('}');
           return $instance;
         }
         
@@ -336,18 +336,18 @@
           } catch (ClassNotFoundException $e) {
             $instance= new UnknownRemoteObject($name);
             $size= $serialized->consumeSize();
-            $serialized->offset++;  // Opening "{"
+            $serialized->consumeCharacter('{');
             for ($i= 0; $i < $size; $i++) {
               $member= $this->valueOf($serialized, $context);
               $members[$member]= $this->valueOf($serialized, $context);
             }
-            $serialized->offset++; // Closing "}"
+            $serialized->consumeCharacter('}');
             $instance->__members= $members;
             return $instance;
           }
           
           $size= $serialized->consumeSize();
-          $serialized->offset++;  // Opening "{"
+          $serialized->consumeCharacter('{');
 
           if ($class->isEnum()) {
             if ($size != 1 || 'name' != $this->valueOf($serialized, $context)) {
@@ -366,7 +366,7 @@
             }
           }
           
-          $serialized->offset++; // Closing "}"
+          $serialized->consumeCharacter('}');
           return $instance;
         }
 

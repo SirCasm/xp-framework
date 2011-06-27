@@ -23,6 +23,14 @@
       'util.collections.HashTable' => 'M',
     );
 
+    protected $tokenMapping = array(
+      's' => 'lang.types.String',
+      'i' => 'lang.types.Integer',
+      'd' => 'lang.types.Double', 
+      'b' => 'lang.types.Boolean',
+      'M' => 'util.collections.HashTable'
+    );
+
 
     /**
      * Returns a value for the given serialized string
@@ -34,10 +42,64 @@
      */
     public function valueOf($serializer, $serialized, $context= array()) {
       // No implementation
-//      var_dump($serialized); 
+      $serialized->offset = 0;
+      $classString = $this->typeFor($serialized);
+      $newInstance = Type::forName($classString)->newInstance();
+      $size = $serialized->consumeSize();
+      
+      var_dump($serialized); 
 
-//      var_dump($serialized->consumeWord());
-//      var_dump($serialized->consumeWord());
+      return $newInstance; 
+    }
+
+    /**
+     *
+     *
+     *
+     *
+     *
+     */
+    public function typeFor($serialized) {
+      $classString = '';
+      switch ($serialized->getCharacter()) {
+        case 'M':
+          $classString = 'util.collections.HashTable<';
+          $type = $serialized->consumeType();
+          $classString .= $this->typeFor($serialized);
+          $classString .= ',';
+          $classString .= $this->typeFor($serialized); 
+          $classString .= '>';
+          return $classString;
+        break;
+        case 'O':
+          $size = $serialized->consumeSize();
+          $classString = $serialized->consumeString();
+          if ($serialized->getCharacter() == ':') {
+            $serialized->consumeCharacter(':');
+          }
+          return $classString;
+        break;
+        case 's':
+        case 'i':
+        case 'd':
+        case 'b':
+          switch ($serialized->getCharacter(1)) {
+            case ';':
+              $classString = $this->tokenMapping[$serialized->consumeWord()];
+            break;
+            case ']':
+              $classString = $this->tokenMapping[$serialized->consumeTypeEnd()];
+              if ($serialized->getCharacter() == ':') {
+                $serialized->consumeCharacter(':');
+              }
+            break;
+          }
+          return $classString;
+        break;
+        default:
+          Console::writeLine('Error found character: '.$serialized->getCharacter());
+        break;
+      }
 
     }
 
@@ -52,26 +114,32 @@
     public function representationOf($serializer, $value, $context= array()) {
         $serializedTypes = '';
         $genericArguments = $value->getClass()->genericArguments();
-        $serializedTypes .= $this->handleGenericArgs($value->getClass());
-
-        return 'M['.$serializedTypes.']:'.$value->size().':{'.$this->serializeContent($serializer, $value).'}';
+        $serializedTypes .= $this->serializeTypes($value->getClass());
+        return $this->typeMapping[$value->getClass()->genericDefinition()->getName()].'['.$serializedTypes.']:'.$value->size().':{'.$this->serializeContent($serializer, $value).'}';
     }
 
-    public function serializeContent($serializer, $hashmap) {
+
+    /**
+     * Serialize the content of the HashTable
+     *
+     *
+     */
+    protected function serializeContent($serializer, $hashmap) {
       $serialized = '';
       foreach ($hashmap->keys() as $key) {
-        $serialized .= $serializer->representationOf($key).$serializer->representationOf($hashmap->get($key));
+        $serialized .= $serializer->representationOf($key);
+        $serialized .= $serializer->representationOf($hashmap->get($key));
+        $serialized = rtrim($serialized, ';');
+        $serialized .= ';';
       }
-      rtrim($serialized, ';');
       return $serialized;
     }
     
     /**
-     *
-     *
+     * Serialize the types of the generic arguments
      *
      */
-    public function handleGenericArgs(XPClass $definition) {
+    protected function serializeTypes(XPClass $definition) {
       $serializedTypes = '';
       $name = $definition->getName();
       $genericArguments = $definition->genericArguments();
@@ -83,7 +151,7 @@
           $name = $comp->genericDefinition()->getName();
 
           // Lookup Type in the map and recursive call to get the generics' types
-          $serializedTypes .= $this->typeMapping[$name].'['.$this->handleGenericArgs($comp).']';
+          $serializedTypes .= $this->typeMapping[$name].'['.$this->serializeTypes($comp).']';
 
         } else if ($comp instanceof Generic) {
           $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
@@ -93,6 +161,7 @@
       }
       // Remove last separator
       $serializedTypes = rtrim($serializedTypes, ';');
+
       return $serializedTypes;
    }
     
