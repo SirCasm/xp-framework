@@ -42,7 +42,7 @@
      */
     public function valueOf($serializer, $serialized, $context= array()) {
       // No implementation
-      $serialized->offset = 0;
+      $serialized->offset -= 2;
       $classString = $this->typeFor($serialized);
       $newInstance = Type::forName($classString)->newInstance();
       $size = $serialized->consumeSize();
@@ -133,7 +133,8 @@
      */
     protected function serializeContent($serializer, $hashmap) {
       $serialized = '';
-      foreach ($hashmap->keys() as $key) {
+      $keys = $hashmap->keys();
+      foreach ($keys as $key) {
         $serialized .= $serializer->representationOf($key);
         $serialized .= $serializer->representationOf($hashmap->get($key));
       }
