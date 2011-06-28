@@ -276,8 +276,7 @@
         'T'   => new ClassReference('util.Date')
       );
 
-      $token= $serialized->buffer{$serialized->offset};
-      $serialized->offset+= 2; 
+      $token= $serialized->consumeSize();
       switch ($token) {
         case 'N': {     // null
           $value= NULL;

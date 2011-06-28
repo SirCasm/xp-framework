@@ -10,7 +10,8 @@
     'net.xp_framework.unittest.remote.Person',
     'net.xp_framework.unittest.remote.Enum',
     'remote.protocol.RemoteInterfaceMapping',
-    'util.Hashmap'
+    'util.Hashmap',
+    'util.collections.HashTable'
   );
 
   /**
@@ -156,13 +157,13 @@
       $hashmap->put('keythree', 'valuethree');
 
       $this->assertEquals(
-        'M[s;s]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
+        'M:[s;s]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
         $this->serializer->representationOf($hashmap)
       );
 
       $hashmap = create('new HashTable<HashTable<string, HashTable<string,string>>, HashTable<integer,string>>');
       $this->assertEquals(
-        'M[M[s;M[s;s]];M[i;s]]:0:{}',
+        'M:[M:[s;M:[s;s]];M:[i;s]]:0:{}',
         $this->serializer->representationOf($hashmap)
       );
 
@@ -177,7 +178,7 @@
       $hashmap->put('test', $innerHashMap);
 
       $this->assertEquals(
-        'M[s;M[s;i]]:1:{s:4:"test";M[s;i]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
+        'M:[s;M:[s;i]]:1:{s:4:"test";M:[s;i]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
         $this->serializer->representationOf($hashmap)
       );
     }
@@ -425,7 +426,7 @@
       $this->assertClass($return, 'lang.types.ArrayList');
       $this->assertEquals(2, $return->length);
       $this->assertEquals(new net·xp_framework·unittest·remote·Person(), $return[0]);
-      $this->assertEquals('World', $return[1]);
+      $this->assertEquals(new String('World'), $return[1]);
     }
 
     /**
@@ -441,6 +442,19 @@
     }
 
     /**
+     * Test serialization of a HashTable object
+     *
+     */
+    #[@test]
+    public function valueOfGenericHashtable() {
+
+       $return = $this->serializer->valueOf(new SerializedData('M:[O:17:"lang.types.String";O:17:"lang.types.Double"]:0:{}'));
+
+       $hashmap = create('new HashTable<lang.types.String, lang.types.Double>');
+       $this->assertEquals($return, $hashmap);
+    }
+
+    /**
      * Test deserialization of an encapsed arraylist
      *
      */
@@ -449,6 +463,7 @@
       $list= $this->serializer->valueOf(
         new SerializedData('A:1:{a:2:{s:2:"la";s:2:"la";s:3:"foo";A:2:{a:1:{s:13:"verschachteln";s:7:"istToll";}s:6:"barbar";}}}')
       );
+      var_dump($list);
       $this->assertEquals($list, new ArrayList(
         array(
           'la'  => 'la',

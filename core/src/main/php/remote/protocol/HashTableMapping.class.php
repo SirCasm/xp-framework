@@ -42,7 +42,7 @@
      */
     public function valueOf($serializer, $serialized, $context= array()) {
       // No implementation
-      $serialized->offset -= 2;
+      $serialized->offset -= 3;
       $classString = $this->typeFor($serialized);
       $newInstance = Type::forName($classString)->newInstance();
       $size = $serialized->consumeSize();
@@ -65,7 +65,7 @@
      */
     public function typeFor($serialized) {
       $classString = '';
-      switch ($serialized->getCharacter()) {
+      switch ($serialized->consumeSize()) {
         case 'M':
           $classString = 'util.collections.HashTable<';
           $type = $serialized->consumeType();
@@ -122,7 +122,7 @@
         $serializedTypes = '';
         $genericArguments = $value->getClass()->genericArguments();
         $serializedTypes .= $this->serializeTypes($value->getClass());
-        return $this->typeMapping[$value->getClass()->genericDefinition()->getName()].'['.$serializedTypes.']:'.$value->size().':{'.$this->serializeContent($serializer, $value).'}';
+        return $this->typeMapping[$value->getClass()->genericDefinition()->getName()].':['.$serializedTypes.']:'.$value->size().':{'.$this->serializeContent($serializer, $value).'}';
     }
 
 
@@ -157,7 +157,7 @@
           $name = $comp->genericDefinition()->getName();
 
           // Lookup Type in the map and recursive call to get the generics' types
-          $serializedTypes .= $this->typeMapping[$name].'['.$this->serializeTypes($comp).']';
+          $serializedTypes .= $this->typeMapping[$name].':['.$this->serializeTypes($comp).']';
 
         } else if ($comp instanceof Generic) {
           $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
