@@ -5,26 +5,26 @@
  */
 
   uses(
-    'remote.protocol.SerializedData',
-    'remote.protocol.DateMapping',
-    'remote.protocol.LongMapping',
+    'lang.Enum',
+    'remote.ClassReference',
+    'remote.ExceptionReference',
+    'remote.protocol.ArrayListMapping',
+    'remote.protocol.ByteArrayMapping',
     'remote.protocol.ByteMapping',
-    'remote.protocol.ShortMapping',
-    'remote.protocol.FloatMapping',
+    'remote.protocol.DateMapping',
     'remote.protocol.DoubleMapping',
-    'remote.protocol.IntegerMapping',
+    'remote.protocol.EnumMapping',
+    'remote.protocol.ExceptionMapping',
+    'remote.protocol.FloatMapping',
     'remote.protocol.HashmapMapping',
     'remote.protocol.HashTableMapping',
-    'remote.protocol.ArrayListMapping',
-    'remote.protocol.ExceptionMapping',
+    'remote.protocol.IntegerMapping',
+    'remote.protocol.LongMapping',
+    'remote.protocol.SerializedData',
+    'remote.protocol.ShortMapping',
     'remote.protocol.StackTraceElementMapping',
-    'remote.protocol.ByteArrayMapping',
-    'remote.protocol.EnumMapping',
     'remote.UnknownRemoteObject',
-    'remote.ExceptionReference',
-    'remote.ClassReference',
-    'util.collections.HashTable',
-    'lang.Enum'
+    'util.collections.HashTable'
   );
 
   /**
@@ -81,7 +81,6 @@
      * @throws  lang.FormatException if an error is encountered in the format 
      */  
     public function representationOf($var, $ctx= array()) {
-
       switch ($type= xp::typeOf($var)) {
         case '<null>': case 'NULL': 
           return 'N;';
@@ -95,8 +94,9 @@
         case 'double': 
           return 'd:'.$var.';';
 
-        case 'string': 
-          return 's:'.strlen($var).':"'.$var.'";';
+        case 'string':
+          $encoded = utf8_encode($var);
+          return 's:'.strlen($encoded).':"'.$encoded.'";';
 
         case 'array':
           $s= 'a:'.sizeof($var).':{';

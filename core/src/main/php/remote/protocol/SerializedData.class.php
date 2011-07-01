@@ -42,6 +42,21 @@
       return $v;
     }
 
+    public function consumeNextToken() {
+      $colonpos = strpos($this->buffer, ':', $this->offset);
+      $semipos  = strpos($this->buffer, ';', $this->offset);
+      $colonpos = $colonpos === FALSE ? $semipos+1 : $colonpos;
+      $v= substr(
+        $this->buffer, 
+        $this->offset, 
+        ($colonpos < $semipos ? $colonpos : $semipos) - $this->offset
+      );
+     
+      $this->offset+= strlen($v)+ 1;  // +1 to set the marker behind
+      return $v;
+
+    }
+
     /**
      * Consume everything up to the next ";" and return it
      * 
@@ -49,11 +64,12 @@
      * @return  string
      */     
     public function consumeWord() {
+      $pos = strpos($this->buffer, ';', $this->offset);
       $v= substr(
         $this->buffer, 
         $this->offset, 
-        strpos($this->buffer, ';', $this->offset)- $this->offset
-      ); 
+        $pos - $this->offset
+      );
       $this->offset+= strlen($v)+ 1;  // +1 to set the marker behind
       return $v;
     }

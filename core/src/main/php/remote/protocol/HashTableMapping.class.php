@@ -14,13 +14,20 @@
    */
   class HashTableMapping extends Object implements SerializerMapping {
     protected $typeMapping = array(
-      'string' => 's',
-      'int' => 'i',
-      'double' => 'd',
-      'boolean' => 'b',
-      'NULL' => 'N',
-      '<null>' => 'N',
-      'util.collections.HashTable' => 'M',
+      'string'                      => 's',
+      'int'                         => 'i',
+      'double'                      => 'd',
+      'boolean'                     => 'b',
+      'NULL'                        => 'N',
+      '<null>'                      => 'N',
+      'util.collections.HashTable'  => 'M',
+      'lang.types.Integer'          => 'i',
+      'lang.types.Double'           => 'd',
+      'lang.types.Short'            => 'S',
+      'lang.types.Long'             => 'l',
+      'lang.types.String'           => 's',
+      'lang.types.Integer'          => 'i',
+      'lang.types.Integer'          => 'i',
     );
 
     protected $tokenMapping = array(
@@ -42,9 +49,10 @@
      */
     public function valueOf($serializer, $serialized, $context= array()) {
       // No implementation
-      $serialized->offset -= 3;
+      $serialized->offset -= 2;
       $classString = $this->typeFor($serialized);
       $newInstance = Type::forName($classString)->newInstance();
+      $serialized->consumeCharacter(':');
       $size = $serialized->consumeSize();
       $serialized->consumeCharacter('{'); 
       for ($i = 0; $i < $size; $i++) {
@@ -65,46 +73,34 @@
      */
     public function typeFor($serialized) {
       $classString = '';
-      switch ($serialized->consumeSize()) {
+      $token = $serialized->consumeNextToken();
+      switch ($token) {
         case 'M':
           $classString = 'util.collections.HashTable<';
-          $type = $serialized->consumeType();
+          $serialized->consumeCharacter('[');
           $classString .= $this->typeFor($serialized);
           $classString .= ',';
           $classString .= $this->typeFor($serialized); 
+          if ($serialized->getCharacter() == ';') {
+            $serialized->consumeCharacter(';');
+          }
+          $serialized->consumeCharacter(']');
           $classString .= '>';
           return $classString;
         break;
         case 'O':
-          $size = $serialized->consumeSize();
           $classString = $serialized->consumeString();
-          if ($serialized->getCharacter() == ']') {
-            $serialized->consumeCharacter(']');
-          }
-          if ($serialized->getCharacter() == ':') {
-            $serialized->consumeCharacter(':');
-          }
           return $classString;
         break;
         case 's':
         case 'i':
         case 'd':
         case 'b':
-          switch ($serialized->getCharacter(1)) {
-            case ';':
-              $classString = $this->tokenMapping[$serialized->consumeWord()];
-            break;
-            case ']':
-              $classString = $this->tokenMapping[$serialized->consumeTypeEnd()];
-              if ($serialized->getCharacter() == ':') {
-                $serialized->consumeCharacter(':');
-              }
-            break;
-          }
-          return $classString;
+          $classString = $this->tokenMapping[$token];
+        return $classString;
         break;
         default:
-          Console::writeLine('Error found character: '.$serialized->getCharacter());
+          Console::writeLine('Error found character: '.$token);
         break;
       }
 
@@ -151,8 +147,10 @@
       $genericArguments = $definition->genericArguments();
       foreach ($genericArguments as $comp)
       {
-        if ($comp instanceof Primitive) {
-          $serializedTypes .= $this->typeMapping[$comp->name];
+/*        if ($comp->isSubClassOf(XPClass::forName('lang.types.Number'))) {
+          $serializedTypes .= $this->typeMapping[$comp->getName()];
+        } else if ($comp->isSubClassOf(XPClass::forName('lang.types.String'))) {
+          $serializedTypes .= $this->typeMapping[$comp->getName()];
         } else if ($comp->isGeneric()) {
           $name = $comp->genericDefinition()->getName();
 
@@ -162,11 +160,21 @@
         } else if ($comp instanceof Generic) {
           $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
         }
+        */
+        if ($comp instanceof Primitive) {
+
+          $serializedTypes .= $this->typeMapping[$comp->getName()];
+        } else if ($comp->isGeneric()) {
+          $name = $comp->genericDefinition()->getName();
+          $serializedTypes .= $this->typeMapping[$name].':['.$this->serializeTypes($comp).']';
+        } else if (!isset($this->typeMapping[$comp->getName()])) {
+          $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
+        } else { 
+          $serializedTypes .= $this->typeMapping[$comp->getName()];
+        }
         // Add separator
         $serializedTypes .= ';';
-      }
-      // Remove last separator
-      $serializedTypes = rtrim($serializedTypes, ';');
+      } 
 
       return $serializedTypes;
    }

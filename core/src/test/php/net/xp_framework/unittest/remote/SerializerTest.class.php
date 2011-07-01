@@ -157,13 +157,13 @@
       $hashmap->put('keythree', 'valuethree');
 
       $this->assertEquals(
-        'M:[s;s]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
+        'M:[s;s;]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
         $this->serializer->representationOf($hashmap)
       );
 
       $hashmap = create('new HashTable<HashTable<string, HashTable<string,string>>, HashTable<integer,string>>');
       $this->assertEquals(
-        'M:[M:[s;M:[s;s]];M:[i;s]]:0:{}',
+        'M:[M:[s;M:[s;s;];];M:[i;s;];]:0:{}',
         $this->serializer->representationOf($hashmap)
       );
 
@@ -178,7 +178,7 @@
       $hashmap->put('test', $innerHashMap);
 
       $this->assertEquals(
-        'M:[s;M:[s;i]]:1:{s:4:"test";M:[s;i]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
+        'M:[s;M:[s;i;];]:1:{s:4:"test";M:[s;i;]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
         $this->serializer->representationOf($hashmap)
       );
     }
