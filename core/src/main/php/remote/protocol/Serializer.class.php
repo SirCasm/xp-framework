@@ -17,6 +17,7 @@
     'remote.protocol.ExceptionMapping',
     'remote.protocol.FloatMapping',
     'remote.protocol.HashmapMapping',
+    'remote.protocol.HashSetMapping',
     'remote.protocol.HashTableMapping',
     'remote.protocol.IntegerMapping',
     'remote.protocol.LongMapping',
@@ -62,6 +63,7 @@
       $this->mappings['Y']= new ByteArrayMapping();
       $this->mappings['M']= new HashTableMapping();
       $this->mappings['V']= new VectorMapping();
+      $this->mappings['SE']= new HashSetMapping();
       
       // A hashmap doesn't have its own token, because it'll be serialized
       // as an array. We use HASHMAP as the token, so it will never match
@@ -87,12 +89,18 @@
         case '<null>': case 'NULL': 
           return 'N;';
 
+        case 'lang.types.Boolean':
+          $var = $var->value;
         case 'boolean': 
           return 'b:'.($var ? 1 : 0).';';
 
+        case 'lang.types.Integer':
+          $var = $var->intValue();
         case 'integer': 
           return 'i:'.$var.';';
 
+        case 'lang.types.Double':
+          $var = $var->doubleValue();
         case 'double': 
           return 'd:'.$var.';';
 
@@ -151,17 +159,18 @@
           $baseType = $this->mappings[$token]->handledClass()->getName();
           $serialized->consumeCharacter('[');
           $typeOne = $this->typeFor($serialized);
-          $typeTwo .= $this->typeFor($serialized); 
+          $typeTwo = $this->typeFor($serialized); 
           if ($serialized->getCharacter() == ';') {
             $serialized->consumeCharacter(';');
           }
           $serialized->consumeCharacter(']');
           return sprintf('%s<%s,%s>', $baseType, $typeOne, $typeTwo);
         break;
-        case 'V': 
+        case 'V':
+        case 'SE':
           $baseType = $this->mappings[$token]->handledClass()->getName();
           $serialized->consumeCharacter('[');
-          $argType .= $this->typeFor($serialized);
+          $argType = $this->typeFor($serialized);
           if ($serialized->getCharacter() == ';') {
             $serialized->consumeCharacter(';');
           }
@@ -174,9 +183,12 @@
         break;
         case 's':
           return 'lang.types.String';
+        case 'b':
+          return 'lang.types.Boolean';
         case 'i':
         case 'd':
-        case 'b':
+        case 'S':
+        case 'B':
           $classString = $this->mappings[$token]->handledClass()->getName();
         return $classString;
         break;
@@ -338,17 +350,17 @@
         }
 
         case 'b': {     // booleans
-          $value= (bool)$serialized->consumeWord();
+          $value= new Boolean((bool)$serialized->consumeWord());
           return $value;
         }
 
         case 'i': {     // integers
-          $value= (int)$serialized->consumeWord();
+          $value= new Integer((int)$serialized->consumeWord());
           return $value;
         }
 
         case 'd': {     // decimals
-          $value= (float)$serialized->consumeWord();
+          $value= new Double((float)$serialized->consumeWord());
           return $value;
         }
 

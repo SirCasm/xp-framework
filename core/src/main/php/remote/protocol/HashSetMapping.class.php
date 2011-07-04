@@ -12,22 +12,26 @@
    * @see      xp://remote.protocol.Serializer
    * @purpose  Mapping
    */
-  class HashTableMapping extends Object implements SerializerMapping {
+  class HashSetMapping extends Object implements SerializerMapping {
     protected $typeMapping = array(
       'string'                      => 's',
       'int'                         => 'i',
       'double'                      => 'd',
       'boolean'                     => 'b',
+      'bool'                        => 'b',
       'NULL'                        => 'N',
       '<null>'                      => 'N',
       'util.collections.HashTable'  => 'M',
+      'util.collections.HashSet'    => 'SE',
       'lang.types.Integer'          => 'i',
       'lang.types.Double'           => 'd',
       'lang.types.Short'            => 'S',
       'lang.types.Long'             => 'l',
+      'lang.types.Boolean'          => 'b',
       'lang.types.String'           => 's',
       'lang.types.Byte'             => 'B',
     );
+
 
     /**
      * Returns a value for the given serialized string
@@ -38,25 +42,19 @@
      * @return  var
      */
     public function valueOf($serializer, $serialized, $context= array()) {
-      // No implementation
-      $serialized->offset -= 2;
+      $serialized->offset -= 3;
       $classString = $serializer->typeFor($serialized);
       $newInstance = Type::forName($classString)->newInstance();
       $serialized->consumeCharacter(':');
       $size = $serialized->consumeSize();
       $serialized->consumeCharacter('{'); 
       for ($i = 0; $i < $size; $i++) {
-        $key = $serializer->valueOf($serialized);
-        $value = $serializer->valueOf($serialized);
-        $newInstance->put($key, $value);
+        $element = $serializer->valueOf($serialized);
+        $newInstance->add($element);
       }
       $serialized->consumeCharacter('}');
 
       return $newInstance; 
-    }
-
-    public function getClassName() {
-      return 'util.collections.HashTable';
     }
 
     /**
@@ -80,12 +78,11 @@
      *
      *
      */
-    protected function serializeContent($serializer, $hashmap) {
+    protected function serializeContent($serializer, $hashset) {
       $serialized = '';
-      $keys = $hashmap->keys();
-      foreach ($keys as $key) {
-        $serialized .= $serializer->representationOf($key);
-        $serialized .= $serializer->representationOf($hashmap->get($key));
+      $elements = $hashset->toArray();
+      foreach ($elements as $element) {
+        $serialized .= $serializer->representationOf($element);
       }
       return $serialized;
     }
@@ -123,7 +120,7 @@
      * @return  lang.XPClass
      */
     public function handledClass() {
-      return Type::forName('util.collections.HashTable');
+      return Type::forName('util.collections.HashSet');
     }
   } 
 ?>

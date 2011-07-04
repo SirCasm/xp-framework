@@ -25,6 +25,7 @@
       '<null>'                      => 'N',
       'util.collections.HashTable'  => 'M',
       'util.collections.Vector'     => 'V',
+      'util.collections.HashSet'    => 'ST',
       'lang.types.Integer'          => 'i',
       'lang.types.Double'           => 'd',
       'lang.types.Short'            => 'S',
@@ -54,6 +55,7 @@
         $key = $serializer->valueOf($serialized);
         $newInstance->add($key);
       }
+      $serialized->consumeCharacter('}');
 
       return $newInstance; 
     }

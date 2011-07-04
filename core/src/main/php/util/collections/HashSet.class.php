@@ -102,7 +102,7 @@
     public function add($element) { 
       $h= $element instanceof Generic ? $element->hashCode() : (is_array($element) ? serialize($element) : $element);
       if (isset($this->_elements[$h])) return FALSE;
-      
+
       $this->_hash+= HashProvider::hashOf($h);
       $this->_elements[$h]= $element;
       return TRUE;

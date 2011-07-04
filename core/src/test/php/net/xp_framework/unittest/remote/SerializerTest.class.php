@@ -184,6 +184,26 @@
     }
 
     /**
+     * Test Serialization of a generic HashTable
+     *
+     */
+    #[@test]
+    public function representationOfGenericList() {
+      $vector = create('new Vector<string>');
+      $vector->add('This');
+      $vector->add('is');
+      $vector->add('hopefully');
+      $vector->add('sufficient');
+      $vector->add('test');
+      $vector->add('data');
+
+      $this->assertEquals(
+        'V:[s;]:6:{s:4:"This";s:2:"is";s:9:"hopefully";s:10:"sufficient";s:4:"test";s:4:"data";}',
+        $this->serializer->representationOf($vector)
+      );
+    }
+
+    /**
      * Test serialization of a date object
      *
      */
@@ -448,7 +468,7 @@
     #[@test]
     public function valueOfGenericHashtable() {
 
-       $return = $this->serializer->valueOf(new SerializedData('M:[O:17:"lang.types.String";O:17:"lang.types.Double"]:0:{}'));
+       $return = $this->serializer->valueOf(new SerializedData('M:[O:17:"lang.types.String";O:17:"lang.types.Double";]:0:{}'));
 
        $hashmap = create('new HashTable<lang.types.String, lang.types.Double>');
        $this->assertEquals($return, $hashmap);
