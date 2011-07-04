@@ -21,12 +21,15 @@
       'NULL'                        => 'N',
       '<null>'                      => 'N',
       'util.collections.HashTable'  => 'M',
+      'util.collections.Vector'     => 'V',
+      'util.collections.HashSet'    => 'ST',
       'lang.types.Integer'          => 'i',
       'lang.types.Double'           => 'd',
       'lang.types.Short'            => 'S',
       'lang.types.Long'             => 'l',
       'lang.types.String'           => 's',
-      'lang.types.Byte'             => 'B',
+      'lang.types.Integer'          => 'i',
+      'lang.types.Integer'          => 'i'
     );
 
     /**

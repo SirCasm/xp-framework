@@ -63,7 +63,7 @@
       $this->mappings['Y']= new ByteArrayMapping();
       $this->mappings['M']= new HashTableMapping();
       $this->mappings['V']= new VectorMapping();
-      $this->mappings['SE']= new HashSetMapping();
+      $this->mappings['ST']= new HashSetMapping();
       
       // A hashmap doesn't have its own token, because it'll be serialized
       // as an array. We use HASHMAP as the token, so it will never match
@@ -154,6 +154,7 @@
     public function typeFor($serialized) {
       $classString = '';
       $token = $serialized->consumeNextToken();
+      var_dump($token);
       switch ($token) {
         case 'M':
           $baseType = $this->mappings[$token]->handledClass()->getName();
@@ -167,7 +168,7 @@
           return sprintf('%s<%s,%s>', $baseType, $typeOne, $typeTwo);
         break;
         case 'V':
-        case 'SE':
+        case 'ST':
           $baseType = $this->mappings[$token]->handledClass()->getName();
           $serialized->consumeCharacter('[');
           $argType = $this->typeFor($serialized);
@@ -189,6 +190,7 @@
         case 'd':
         case 'S':
         case 'B':
+          $serializer->consumeWord();
           $classString = $this->mappings[$token]->handledClass()->getName();
         return $classString;
         break;
