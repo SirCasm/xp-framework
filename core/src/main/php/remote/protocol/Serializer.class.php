@@ -44,6 +44,15 @@
     public
       $_classMapping  = array();
 
+    protected $tokenMapping = array(
+      's' => 'lang.types.String',
+      'i' => 'lang.types.Integer',
+      'd' => 'lang.types.Double', 
+      'b' => 'lang.types.Boolean',
+      'V' => 'util.collections.Vector',
+      'M' => 'util.collections.HashTable'
+    );
+
     /**
      * Constructor. Initializes the default mappings
      *
@@ -135,7 +144,60 @@
           throw new FormatException('Cannot serialize unknown type '.$type);
       }
     }
-    
+
+    /**
+     * Resolves types for generic Collections when 
+     * deserializing. 
+     *
+     * @param remote.protocol.SerializedData serialized
+     *
+     */
+    public function typeFor($serialized) {
+      $classString = '';
+      $token = $serialized->consumeNextToken();
+      switch ($token) {
+        case 'M':
+          $classString = 'util.collections.HashTable<';
+          $serialized->consumeCharacter('[');
+          $classString .= $this->typeFor($serialized);
+          $classString .= ',';
+          $classString .= $this->typeFor($serialized); 
+          if ($serialized->getCharacter() == ';') {
+            $serialized->consumeCharacter(';');
+          }
+          $serialized->consumeCharacter(']');
+          $classString .= '>';
+          return $classString;
+        break;
+        case 'V': 
+          $classString = 'util.collections.Vector<';
+          $serialized->consumeCharacter('[');
+          $classString .= $this->typeFor($serialized);
+          if ($serialized->getCharacter() == ';') {
+            $serialized->consumeCharacter(';');
+          }
+          $serialized->consumeCharacter(']');
+          $classString .= '>';
+          return $classString;
+        break;
+        case 'O':
+          $classString = $serialized->consumeString();
+          return $classString;
+        break;
+        case 's':
+        case 'i':
+        case 'd':
+        case 'b':
+          $classString = $this->tokenMapping[$token];
+        return $classString;
+        break;
+        default:
+          Console::writeLine('Error found character: '.$token);
+        break;
+      }
+
+    }
+
     /**
      * Fetch best fitted mapper for the given object
      *

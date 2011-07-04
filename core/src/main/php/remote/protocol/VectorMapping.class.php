@@ -4,7 +4,10 @@
  * $Id$ 
  */
 
-  uses('util.Hashmap', 'remote.protocol.SerializerMapping');
+  uses(
+    'util.collections.Vector', 
+    'remote.protocol.SerializerMapping'
+  );
 
   /**
    * Mapping for Hashmaps
@@ -12,7 +15,7 @@
    * @see      xp://remote.protocol.Serializer
    * @purpose  Mapping
    */
-  class HashTableMapping extends Object implements SerializerMapping {
+  class VectorMapping extends Object implements SerializerMapping {
     protected $typeMapping = array(
       'string'                      => 's',
       'int'                         => 'i',
@@ -21,23 +24,15 @@
       'NULL'                        => 'N',
       '<null>'                      => 'N',
       'util.collections.HashTable'  => 'M',
+      'util.collections.Vector'     => 'V',
       'lang.types.Integer'          => 'i',
       'lang.types.Double'           => 'd',
       'lang.types.Short'            => 'S',
       'lang.types.Long'             => 'l',
       'lang.types.String'           => 's',
       'lang.types.Integer'          => 'i',
-      'lang.types.Integer'          => 'i',
+      'lang.types.Integer'          => 'i'
     );
-
-    protected $tokenMapping = array(
-      's' => 'lang.types.String',
-      'i' => 'lang.types.Integer',
-      'd' => 'lang.types.Double', 
-      'b' => 'lang.types.Boolean',
-      'M' => 'util.collections.HashTable'
-    );
-
 
     /**
      * Returns a value for the given serialized string
@@ -57,12 +52,12 @@
       $serialized->consumeCharacter('{'); 
       for ($i = 0; $i < $size; $i++) {
         $key = $serializer->valueOf($serialized);
-        $value = $serializer->valueOf($serialized);
-        $newInstance->put($key, $value);
+        $newInstance->add($key);
       }
 
       return $newInstance; 
     }
+
 
     /**
      * Returns an on-the-wire representation of the given value
@@ -85,12 +80,11 @@
      *
      *
      */
-    protected function serializeContent($serializer, $hashmap) {
+    protected function serializeContent($serializer, $vector) {
       $serialized = '';
-      $keys = $hashmap->keys();
-      foreach ($keys as $key) {
-        $serialized .= $serializer->representationOf($key);
-        $serialized .= $serializer->representationOf($hashmap->get($key));
+      $elements = $vector->elements();
+      foreach ($elements as $element) {
+        $serialized .= $serializer->representationOf($element);
       }
       return $serialized;
     }
@@ -105,22 +99,7 @@
       $genericArguments = $definition->genericArguments();
       foreach ($genericArguments as $comp)
       {
-/*        if ($comp->isSubClassOf(XPClass::forName('lang.types.Number'))) {
-          $serializedTypes .= $this->typeMapping[$comp->getName()];
-        } else if ($comp->isSubClassOf(XPClass::forName('lang.types.String'))) {
-          $serializedTypes .= $this->typeMapping[$comp->getName()];
-        } else if ($comp->isGeneric()) {
-          $name = $comp->genericDefinition()->getName();
-
-          // Lookup Type in the map and recursive call to get the generics' types
-          $serializedTypes .= $this->typeMapping[$name].':['.$this->serializeTypes($comp).']';
-
-        } else if ($comp instanceof Generic) {
-          $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
-        }
-        */
         if ($comp instanceof Primitive) {
-
           $serializedTypes .= $this->typeMapping[$comp->getName()];
         } else if ($comp->isGeneric()) {
           $name = $comp->genericDefinition()->getName();
@@ -143,7 +122,7 @@
      * @return  lang.XPClass
      */
     public function handledClass() {
-      return Type::forName('util.collections.HashTable');
+      return Type::forName('util.collections.Vector');
     }
   } 
 ?>
