@@ -23,6 +23,7 @@
     'remote.protocol.SerializedData',
     'remote.protocol.ShortMapping',
     'remote.protocol.StackTraceElementMapping',
+    'remote.protocol.VectorMapping',
     'remote.UnknownRemoteObject',
     'util.collections.HashTable'
   );
@@ -60,6 +61,7 @@
       $this->mappings['t']= new StackTraceElementMapping();
       $this->mappings['Y']= new ByteArrayMapping();
       $this->mappings['M']= new HashTableMapping();
+      $this->mappings['V']= new VectorMapping();
       
       // A hashmap doesn't have its own token, because it'll be serialized
       // as an array. We use HASHMAP as the token, so it will never match
@@ -94,6 +96,8 @@
         case 'double': 
           return 'd:'.$var.';';
 
+        case 'lang.types.String':
+          $var = $var->toString();
         case 'string':
           $encoded = utf8_encode($var);
           return 's:'.strlen($encoded).':"'.$encoded.'";';
@@ -275,7 +279,6 @@
         'A'   => new ClassReference('lang.types.ArrayList'),
         'T'   => new ClassReference('util.Date')
       );
-
       $token= $serialized->consumeSize();
       switch ($token) {
         case 'N': {     // null
