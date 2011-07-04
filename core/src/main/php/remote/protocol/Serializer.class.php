@@ -44,15 +44,6 @@
     public
       $_classMapping  = array();
 
-    protected $tokenMapping = array(
-      's' => 'lang.types.String',
-      'i' => 'lang.types.Integer',
-      'd' => 'lang.types.Double', 
-      'b' => 'lang.types.Boolean',
-      'V' => 'util.collections.Vector',
-      'M' => 'util.collections.HashTable'
-    );
-
     /**
      * Constructor. Initializes the default mappings
      *
@@ -157,38 +148,36 @@
       $token = $serialized->consumeNextToken();
       switch ($token) {
         case 'M':
-          $classString = 'util.collections.HashTable<';
+          $baseType = $this->mappings[$token]->handledClass()->getName();
           $serialized->consumeCharacter('[');
-          $classString .= $this->typeFor($serialized);
-          $classString .= ',';
-          $classString .= $this->typeFor($serialized); 
+          $typeOne = $this->typeFor($serialized);
+          $typeTwo .= $this->typeFor($serialized); 
           if ($serialized->getCharacter() == ';') {
             $serialized->consumeCharacter(';');
           }
           $serialized->consumeCharacter(']');
-          $classString .= '>';
-          return $classString;
+          return sprintf('%s<%s,%s>', $baseType, $typeOne, $typeTwo);
         break;
         case 'V': 
-          $classString = 'util.collections.Vector<';
+          $baseType = $this->mappings[$token]->handledClass()->getName();
           $serialized->consumeCharacter('[');
-          $classString .= $this->typeFor($serialized);
+          $argType .= $this->typeFor($serialized);
           if ($serialized->getCharacter() == ';') {
             $serialized->consumeCharacter(';');
           }
           $serialized->consumeCharacter(']');
-          $classString .= '>';
-          return $classString;
+          return sprintf('%s<%s>', $baseType, $argType);
         break;
         case 'O':
           $classString = $serialized->consumeString();
           return $classString;
         break;
         case 's':
+          return 'lang.types.String';
         case 'i':
         case 'd':
         case 'b':
-          $classString = $this->tokenMapping[$token];
+          $classString = $this->mappings[$token]->handledClass()->getName();
         return $classString;
         break;
         default:

@@ -30,7 +30,6 @@
      * @return  string
      */
     public function representationOf($serializer, $value, $context= array());
-
     
     /**
      * Return XPClass object of class supported by this mapping

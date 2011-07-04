@@ -26,8 +26,7 @@
       'lang.types.Short'            => 'S',
       'lang.types.Long'             => 'l',
       'lang.types.String'           => 's',
-      'lang.types.Integer'          => 'i',
-      'lang.types.Integer'          => 'i',
+      'lang.types.Byte'             => 'B',
     );
 
     protected $tokenMapping = array(
@@ -105,22 +104,7 @@
       $genericArguments = $definition->genericArguments();
       foreach ($genericArguments as $comp)
       {
-/*        if ($comp->isSubClassOf(XPClass::forName('lang.types.Number'))) {
-          $serializedTypes .= $this->typeMapping[$comp->getName()];
-        } else if ($comp->isSubClassOf(XPClass::forName('lang.types.String'))) {
-          $serializedTypes .= $this->typeMapping[$comp->getName()];
-        } else if ($comp->isGeneric()) {
-          $name = $comp->genericDefinition()->getName();
-
-          // Lookup Type in the map and recursive call to get the generics' types
-          $serializedTypes .= $this->typeMapping[$name].':['.$this->serializeTypes($comp).']';
-
-        } else if ($comp instanceof Generic) {
-          $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
-        }
-        */
         if ($comp instanceof Primitive) {
-
           $serializedTypes .= $this->typeMapping[$comp->getName()];
         } else if ($comp->isGeneric()) {
           $name = $comp->genericDefinition()->getName();
