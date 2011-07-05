@@ -5,13 +5,15 @@
  */
 
   uses(
-    'unittest.TestCase',
-    'remote.protocol.Serializer',
-    'net.xp_framework.unittest.remote.Person',
     'net.xp_framework.unittest.remote.Enum',
+    'net.xp_framework.unittest.remote.Person',
     'remote.protocol.RemoteInterfaceMapping',
-    'util.Hashmap',
-    'util.collections.HashTable'
+    'remote.protocol.Serializer',
+    'unittest.TestCase',
+    'util.collections.HashSet',
+    'util.collections.HashTable',
+    'util.collections.Vector',
+    'util.Hashmap'
   );
 
   /**
@@ -182,6 +184,21 @@
         $this->serializer->representationOf($hashmap)
       );
     }
+
+    /**
+     * Test Serialization of a generic HashTable
+     *
+     */
+    #[@test]
+    public function representationOfNestedGenerics() {
+      $hashmap = create('new HashSet<HashTable<Vector<string>,HashSet<int>>>');
+
+      $this->assertEquals(
+        'ST:[M:[V:[s;];ST:[i;];];]:0:{}',
+        $this->serializer->representationOf($hashmap)
+      );
+    }
+
 
     /**
      * Test Serialization of a generic HashTable
@@ -402,8 +419,8 @@
       $obj= $this->serializer->valueOf(new SerializedData('O:40:"net.xp_framework.unittest.remote.Unknown":2:{s:2:"id";i:1549;s:4:"name";s:11:"Timm Friebe";};'));
       $this->assertClass($obj, 'remote.UnknownRemoteObject');
       $this->assertEquals('net.xp_framework.unittest.remote.Unknown', $obj->__name);
-      $this->assertEquals(1549, $obj->__members['id']);
-      $this->assertEquals('Timm Friebe', $obj->__members['name']);
+      $this->assertEquals(new Integer(1549), $obj->__members['id']);
+      $this->assertEquals(new String('Timm Friebe'), $obj->__members['name']);
     }
 
     /**
@@ -445,6 +462,7 @@
       ));
       $this->assertClass($return, 'lang.types.ArrayList');
       $this->assertEquals(2, $return->length);
+      var_dump($return[0]);
       $this->assertEquals(new net·xp_framework·unittest·remote·Person(), $return[0]);
       $this->assertEquals(new String('World'), $return[1]);
     }
@@ -483,13 +501,12 @@
       $list= $this->serializer->valueOf(
         new SerializedData('A:1:{a:2:{s:2:"la";s:2:"la";s:3:"foo";A:2:{a:1:{s:13:"verschachteln";s:7:"istToll";}s:6:"barbar";}}}')
       );
-      var_dump($list);
       $this->assertEquals($list, new ArrayList(
         array(
-          'la'  => 'la',
+          'la'  => new String('la'),
           'foo' => new ArrayList(
-            array('verschachteln' => 'istToll'),
-            'barbar'
+            array('verschachteln' => new String('istToll')),
+            new String('barbar')
           )
         ))
       );

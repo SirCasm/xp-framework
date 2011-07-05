@@ -368,7 +368,9 @@
         }
 
         case 's': {     // strings
-          $value= new String($serialized->consumeString());
+          $value= isset($context['serializeAsBasic']) ? 
+            $serialized->consumeString() : 
+            new String($serialized->consumeString());
           return $value;
         }
 
@@ -376,8 +378,10 @@
           $a= array();
           $size= $serialized->consumeSize();
           $serialized->consumeCharacter('{');
+          $varcontext = $context;
+          $varcontext['serializeAsBasic'] = TRUE;
           for ($i= 0; $i < $size; $i++) {
-            $key= $this->valueOf($serialized, $context);
+            $key= $this->valueOf($serialized, $varcontext);
             $a[$key]= $this->valueOf($serialized, $context);
           }
           $serialized->consumeCharacter('}');
@@ -388,8 +392,10 @@
           $instance= new ExceptionReference($serialized->consumeString());
           $size= $serialized->consumeSize();
           $serialized->consumeCharacter('{');
+          $varcontext = $context;
+          $varcontext['serializeAsBasic'] = TRUE;
           for ($i= 0; $i < $size; $i++) {
-            $member= $this->valueOf($serialized, $context);
+            $member= $this->valueOf($serialized, $varcontext);
             $instance->{$member}= $this->valueOf($serialized, $context);
           }
           $serialized->consumeCharacter('}');
@@ -405,8 +411,10 @@
             $instance= new UnknownRemoteObject($name);
             $size= $serialized->consumeSize();
             $serialized->consumeCharacter('{');
+            $varcontext = $context;
+            $varcontext['serializeAsBasic'] = TRUE;
             for ($i= 0; $i < $size; $i++) {
-              $member= $this->valueOf($serialized, $context);
+              $member= $this->valueOf($serialized, $varcontext);
               $members[$member]= $this->valueOf($serialized, $context);
             }
             $serialized->consumeCharacter('}');
@@ -428,9 +436,12 @@
             $instance= Enum::valueOf($class, $this->valueOf($serialized, $context));
           } else {
             $instance= $class->newInstance();
+            $varcontext = $context;
+            $varcontext['serializeAsBasic'] = TRUE;
             for ($i= 0; $i < $size; $i++) {
-              $member= $this->valueOf($serialized, $context);
-              $instance->{$member}= $this->valueOf($serialized, $context);
+              $member= $this->valueOf($serialized, $varcontext);
+              $temp = $this->valueOf($serialized, $context);
+              $instance->{$member} = $temp;
             }
           }
           

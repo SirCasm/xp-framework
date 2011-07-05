@@ -46,7 +46,6 @@
       $colonpos = strpos($this->buffer, ':', $this->offset);
       $semipos  = strpos($this->buffer, ';', $this->offset);
       $colonpos = $colonpos === FALSE ? $semipos+1 : $colonpos;
-      var_dump($colonpos, $semipos, $this->offset);
       $v= substr(
         $this->buffer, 
         $this->offset, 

@@ -17,6 +17,11 @@
       $id     = 1549,
       $name   = 'Timm Friebe';
 
+    public function __construct() {
+      $this->id     = new Integer(1549);
+      $this->name   = new String('Timm Friebe');
+    }
+
     /**
      * Set Id
      *
