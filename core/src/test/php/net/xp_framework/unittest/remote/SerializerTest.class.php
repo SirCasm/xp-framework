@@ -302,7 +302,7 @@
     #[@test]
     public function valueOfInt() {
       $this->assertEquals(
-        1,
+        new Integer(1),
         $this->serializer->valueOf(new SerializedData('i:1;'))
       );
     }
@@ -350,7 +350,7 @@
     #[@test]
     public function valueOfDouble() {
       $this->assertEquals(
-        1.5,
+        new Double(1.5),
         $this->serializer->valueOf(new SerializedData('d:1.5;'))
       );
     }

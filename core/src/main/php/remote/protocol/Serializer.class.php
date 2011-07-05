@@ -154,12 +154,15 @@
     public function typeFor($serialized) {
       $classString = '';
       $token = $serialized->consumeNextToken();
-      var_dump($token);
       switch ($token) {
         case 'M':
           $baseType = $this->mappings[$token]->handledClass()->getName();
           $serialized->consumeCharacter('[');
           $typeOne = $this->typeFor($serialized);
+          if ($serialized->getCharacter() == ';') {
+            $serialized->consumeCharacter(';');
+          }
+
           $typeTwo = $this->typeFor($serialized); 
           if ($serialized->getCharacter() == ';') {
             $serialized->consumeCharacter(';');
@@ -190,7 +193,6 @@
         case 'd':
         case 'S':
         case 'B':
-          $serializer->consumeWord();
           $classString = $this->mappings[$token]->handledClass()->getName();
         return $classString;
         break;
@@ -198,7 +200,6 @@
           Console::writeLine('Error found character: '.$token);
         break;
       }
-
     }
 
     /**

@@ -46,6 +46,7 @@
       $colonpos = strpos($this->buffer, ':', $this->offset);
       $semipos  = strpos($this->buffer, ';', $this->offset);
       $colonpos = $colonpos === FALSE ? $semipos+1 : $colonpos;
+      var_dump($colonpos, $semipos, $this->offset);
       $v= substr(
         $this->buffer, 
         $this->offset, 
@@ -80,7 +81,7 @@
         return;
       }
 
-      throw new IllegalStateException(sprintf('Expected "%s" character, found "%s" instead', $chr, $this->buffer{$this->offset}));
+      throw new IllegalStateException(sprintf('Expected "%s" character, found "%s" instead. Offset %d.', $chr, $this->buffer{$this->offset}, $this->offset));
       
     }
 
