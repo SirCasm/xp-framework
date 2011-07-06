@@ -129,7 +129,7 @@
     #[@test]
     public function representationOfIntegerArray() {
       $this->assertEquals(
-        'a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object";]:3:{i:0;i:1;i:1;i:2;i:2;i:5;}',
         $this->serializer->representationOf($var= array(1, 2, 5))
       );
     }
@@ -142,7 +142,7 @@
     #[@test]
     public function representationOfStringArray() {
       $this->assertEquals(
-        'a:2:{i:0;s:4:"More";i:1;s:5:"Power";}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object";]:2:{i:0;s:4:"More";i:1;s:5:"Power";}',
         $this->serializer->representationOf($var= array('More', 'Power'))
       );
     }
@@ -240,7 +240,7 @@
       $h->put('number', '6100');
 
       $this->assertEquals(
-        'a:2:{s:3:"key";s:5:"value";s:6:"number";s:4:"6100";}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object";]:2:{s:3:"key";s:5:"value";s:6:"number";s:4:"6100";}',
         $this->serializer->representationOf($h)
       );
     }
@@ -256,7 +256,7 @@
       $h->put('number', 6100);
 
       $this->assertEquals(
-        'a:2:{s:3:"key";s:5:"value";s:6:"number";i:6100;}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object";]:2:{s:3:"key";s:5:"value";s:6:"number";i:6100;}',
         $this->serializer->representationOf($h)
       );
     }
