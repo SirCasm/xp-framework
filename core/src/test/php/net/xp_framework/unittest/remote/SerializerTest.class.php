@@ -275,6 +275,19 @@
     }
 
     /**
+     * Test serialization of a generic value object
+     *
+     * @see     xp://Person
+     */
+    #[@test]
+    public function representationOfGenericException() {
+      $this->assertEquals(
+        'E:16:"lang.XPException":3:{7:message;s:17:"Generic Exception";5:trace;V:[t;]:9:{t:4:{4:file;N:5:class;s:14:"SerializerTest";6:method;s:32:"representationOfGenericException";4:line;i:0;}t:4:{4:file;s:16:"Method.class.php";5:class;s:20:"php.ReflectionMethod";6:method;s:10:"invokeArgs";4:line;i:102;}t:4:{4:file;s:19:"TestSuite.class.php";5:class;s:19:"lang.reflect.Method";6:method;s:6:"invoke";4:line;i:266;}t:4:{4:file;s:19:"TestSuite.class.php";5:class;s:18:"unittest.TestSuite";6:method;s:11:"runInternal";4:line;i:473;}t:4:{4:file;s:16:"Runner.class.php";5:class;s:18:"unittest.TestSuite";6:method;s:3:"run";4:line;i:236;}t:4:{4:file;s:16:"Runner.class.php";5:class;s:18:"xp.unittest.Runner";6:method;s:3:"run";4:line;i:247;}t:4:{4:file;N:5:class;s:18:"xp.unittest.Runner";6:method;s:4:"main";4:line;i:0;}t:4:{4:file;s:16:"Method.class.php";5:class;s:20:"php.ReflectionMethod";6:method;s:10:"invokeArgs";4:line;i:102;}t:4:{4:file;s:9:"class.php";5:class;s:19:"lang.reflect.Method";6:method;s:6:"invoke";4:line;i:90;}}5:cause;N:}',
+        $this->serializer->representationOf(new XPException('Generic Exception'))
+      );
+    }
+
+    /**
      * Test serialization of a mapped value object
      *
      * @see     xp://Person
