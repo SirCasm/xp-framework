@@ -25,13 +25,19 @@
     public function valueOf($serializer, $serialized, $context= array()) {
       $size= $serialized->consumeSize();
       $details= array();
-      $serialized->offset++;  // Opening "{"
+      $serialized->consumeCharacter('{');  // Opening "{"
       for ($i= 0; $i < $size; $i++) {
-        $detail= $serializer->valueOf($serialized, $context);
-        $details[$detail]= $serializer->valueOf($serialized, $context);
+        $detail= $serialized->consumeIdentifier();
+        $element = $serializer->valueOf($serialized, $context);
+        if ($element instanceof String) {
+          $details[$detail] = $element->toString();
+        } else if ($element instanceof Number) {
+          $details[$detail] = $element->intValue();
+        } else {
+          $details[$detail] = $element;
+        }
       }
-      $serialized->offset++;  // Closing "}"
-      
+      $serialized->consumeCharacter('}');  // Closing "}"
       return new RemoteStackTraceElement(
         $details['file'],
         $details['class'],
@@ -52,10 +58,10 @@
      */
     public function representationOf($serializer, $value, $context= array()) {
       return 't:4:{'.
-        's:4:"file";'.$serializer->representationOf(NULL == $value->file ? NULL : basename($value->file)).
-        's:5:"class";'.$serializer->representationOf(NULL == $value->class ? NULL : xp::nameOf($value->class)).
-        's:6:"method";'.$serializer->representationOf($value->method).
-        's:4:"line";'.$serializer->representationOf($value->line).
+        '4:file;'.$serializer->representationOf(NULL == $value->file ? NULL : basename($value->file)).
+        '5:class;'.$serializer->representationOf(NULL == $value->class ? NULL : xp::nameOf($value->class)).
+        '6:method;'.$serializer->representationOf($value->method).
+        '4:line;'.$serializer->representationOf($value->line).
       '}';
     }
     

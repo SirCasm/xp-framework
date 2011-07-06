@@ -33,7 +33,13 @@
       $data= array();
       for ($i= 0; $i < $size; $i++) {
         $member= $serializer->valueOf($serialized, $context);
-        $data[$member]= $serializer->valueOf($serialized, $context);
+        $element = $serializer->valueOf($serialized, $context);
+        if ($member == 'trace') {
+          $element= $element->elements();
+        } else if ($member == 'message') {
+          $element= $element->toString();
+        }
+        $data[$member]= $element;
       }
       $serialized->offset++; // Closing "}"
       
@@ -56,6 +62,9 @@
      */
     public function representationOf($serializer, $value, $context= array()) {
       $trace= $value->getStackTrace();
+
+      $traceTable = create('new Vector<lang.StackTraceElement>');
+      $traceTable->addAll($trace);
       
       if (FALSE !== ($token= array_search($value->getClassName(), $serializer->exceptions, TRUE))) {
       
@@ -66,19 +75,15 @@
         // Generic exceptions
         $s= 'E:'.strlen($value->getClassName()).':"'.$value->getClassName().'":3:{';
       }
-      $s.= 's:7:"message";';
+      $s.= '7:message;';
       $s.= $serializer->representationOf($value->getMessage());
       
-      $s.= 's:5:"trace";a:'.sizeof($trace).':{';
-      $i= 0;
-      foreach ($trace as $element) {
-        $s.= 'i:'.$i++.';'.$serializer->representationOf($element, $context);
-      }
+      $s.= '5:trace;'.$serializer->representationOf($traceTable, $context);
       
       // Transfer cause
-      $s.= '}s:5:"cause";'.(($value instanceof ChainedException) 
+      $s.= '5:cause;'.(($value instanceof ChainedException) 
         ? $serializer->representationOf($value->getCause(), $context)
-        : 'N;'
+        : 'N:' //TODO: Remove all the hardcoded stuff
       );
       
       return $s.'}';

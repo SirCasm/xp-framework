@@ -39,7 +39,7 @@
      */
     #[@test]
     public function representationOfNull() {
-      $this->assertEquals('N;', $this->serializer->representationOf(NULL));
+      $this->assertEquals('N:', $this->serializer->representationOf(NULL));
     }
 
     /**
@@ -269,7 +269,7 @@
     #[@test]
     public function representationOfValueObject() {
       $this->assertEquals(
-        'O:39:"net.xp_framework.unittest.remote.Person":2:{s:2:"id";i:1549;s:4:"name";s:11:"Timm Friebe";}',
+        'O:39:"net.xp_framework.unittest.remote.Person":2:{2:id;i:1549;4:name;s:11:"Timm Friebe";}',
         $this->serializer->representationOf(new net·xp_framework·unittest·remote·Person())
       );
     }
@@ -283,7 +283,7 @@
     public function representationOfMappedValueObject() {
       $this->serializer->mapPackage('remote', Package::forName('net.xp_framework.unittest.remote'));
       $this->assertEquals(
-        'O:13:"remote.Person":2:{s:2:"id";i:1549;s:4:"name";s:11:"Timm Friebe";}',
+        'O:13:"remote.Person":2:{2:id;i:1549;4:name;s:11:"Timm Friebe";}',
         $this->serializer->representationOf(new net·xp_framework·unittest·remote·Person())
       );
     }
@@ -295,7 +295,7 @@
     #[@test]
     public function representationOfEnum() {
       $this->assertEquals(
-        'O:37:"net.xp_framework.unittest.remote.Enum":1:{s:4:"name";s:6:"Value1";}',
+        'O:37:"net.xp_framework.unittest.remote.Enum":1:{4:name;s:6:"Value1";}',
         $this->serializer->representationOf(net·xp_framework·unittest·remote·Enum::$Value1)
       );
     }
@@ -416,7 +416,7 @@
      */
     #[@test]
     public function valueOfUnknownObject() {
-      $obj= $this->serializer->valueOf(new SerializedData('O:40:"net.xp_framework.unittest.remote.Unknown":2:{s:2:"id";i:1549;s:4:"name";s:11:"Timm Friebe";};'));
+      $obj= $this->serializer->valueOf(new SerializedData('O:40:"net.xp_framework.unittest.remote.Unknown":2:{2:id;i:1549;4:name;s:11:"Timm Friebe";};'));
       $this->assertClass($obj, 'remote.UnknownRemoteObject');
       $this->assertEquals('net.xp_framework.unittest.remote.Unknown', $obj->__name);
       $this->assertEquals(new Integer(1549), $obj->__members['id']);
@@ -431,9 +431,9 @@
     public function valueOfException() {
       $exception= $this->serializer->valueOf(new SerializedData(
         'E:46:"java.lang.reflect.UndeclaredThrowableException":3:{'.
-        's:7:"message";s:12:"*** BLAM ***";'.
-        's:5:"trace";a:1:{i:0;t:4:{s:4:"file";s:9:"Test.java";s:5:"class";s:4:"Test";s:6:"method";s:4:"main";s:4:"line";i:10;}}'.
-        's:5:"cause";N;'.
+        '7:message;s:12:"*** BLAM ***";'.
+        '5:trace;V:[t;]:1:{t:4:{4:file;s:9:"Test.java";5:class;s:4:"Test";6:method;s:4:"main";4:line;i:10;}}'.
+        '5:cause;N:'.
         '}'
       ));
       $this->assertClass($exception, 'remote.ExceptionReference');
@@ -458,11 +458,10 @@
     #[@test]
     public function valueOfArrayList() {
       $return= $this->serializer->valueOf(
-        new SerializedData('A:2:{O:39:"net.xp_framework.unittest.remote.Person":2:{s:2:"id";i:1549;s:4:"name";s:11:"Timm Friebe";}s:5:"World";}'
+        new SerializedData('A:2:{O:39:"net.xp_framework.unittest.remote.Person":2:{2:id;i:1549;4:name;s:11:"Timm Friebe";}s:5:"World";}'
       ));
       $this->assertClass($return, 'lang.types.ArrayList');
       $this->assertEquals(2, $return->length);
-      var_dump($return[0]);
       $this->assertEquals(new net·xp_framework·unittest·remote·Person(), $return[0]);
       $this->assertEquals(new String('World'), $return[1]);
     }

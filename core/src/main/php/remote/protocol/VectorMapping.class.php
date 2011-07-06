@@ -32,7 +32,7 @@
       'lang.types.Long'             => 'l',
       'lang.types.String'           => 's',
       'lang.types.Integer'          => 'i',
-      'lang.types.Integer'          => 'i'
+      'lang.StackTraceElement'      => 't'
     );
 
     /**

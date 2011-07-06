@@ -24,6 +24,23 @@
       $this->buffer= $buffer;
       $this->offset= 0;
     }
+
+    /**
+     * Consume a identifier ([length]:[string])
+     * 
+     * @return  string
+     */
+    public function consumeIdentifier() {
+      $l= substr(
+        $this->buffer, 
+        $this->offset, 
+        strpos($this->buffer, ':', $this->offset)- $this->offset
+      );
+      $b= strlen($l)+ 1;              // 1 for ':'
+      $v= substr($this->buffer, $this->offset + $b, $l);
+      $this->offset+= $b + $l + 1;    // 1 for '"'
+      return $v;
+    }
     
     /**
      * Consume a string ([length]:"[string]")

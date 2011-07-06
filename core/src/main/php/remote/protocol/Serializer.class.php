@@ -59,6 +59,7 @@
       $this->mappings['i']= new IntegerMapping();
       $this->mappings['A']= new ArrayListMapping();
       $this->mappings['e']= new ExceptionMapping();
+      $this->mappings['E']= new ExceptionMapping();
       $this->mappings['t']= new StackTraceElementMapping();
       $this->mappings['Y']= new ByteArrayMapping();
       $this->mappings['M']= new HashTableMapping();
@@ -87,7 +88,7 @@
     public function representationOf($var, $ctx= array()) {
       switch ($type= xp::typeOf($var)) {
         case '<null>': case 'NULL': 
-          return 'N;';
+          return 'N:';
 
         case 'lang.types.Boolean':
           $var = $var->value;
@@ -132,16 +133,18 @@
           unset($props['__id']);
           $s= 'O:'.strlen($type).':"'.$type.'":'.sizeof($props).':{';
           foreach (array_keys($props) as $name) {
-            $s.= serialize($name).$this->representationOf($var->{$name}, $ctx);
+            $s.= $this->serializeIdentifier($name).$this->representationOf($var->{$name}, $ctx);
           }
           return $s.'}';
         }
 
-
-
         default: 
           throw new FormatException('Cannot serialize unknown type '.$type);
       }
+    }
+
+    public function serializeIdentifier($ident) {
+      return strlen($ident).':'.$ident.';';
     }
 
     /**
@@ -189,6 +192,7 @@
           return 'lang.types.String';
         case 'b':
           return 'lang.types.Boolean';
+        case 't':
         case 'i':
         case 'd':
         case 'S':
@@ -328,7 +332,7 @@
      * @throws  lang.ClassNotFoundException if a class cannot be found
      * @throws  lang.FormatException if an error is encountered in the format 
      */  
-    public function valueOf($serialized, $context= array()) {
+    public function valueOf(SerializedData $serialized, $context= array()) {
       static $types= NULL;
       
       if (!$types) $types= array(
@@ -368,20 +372,16 @@
         }
 
         case 's': {     // strings
-          $value= isset($context['serializeAsBasic']) ? 
-            $serialized->consumeString() : 
-            new String($serialized->consumeString());
+          $value = new String($serialized->consumeString());
           return $value;
         }
 
-        case 'a': {     // arrays
+        case 'a': {     // untyped map
           $a= array();
           $size= $serialized->consumeSize();
           $serialized->consumeCharacter('{');
-          $varcontext = $context;
-          $varcontext['serializeAsBasic'] = TRUE;
           for ($i= 0; $i < $size; $i++) {
-            $key= $this->valueOf($serialized, $varcontext);
+            $key= $this->valueOf($serialized, $context);
             $a[$key]= $this->valueOf($serialized, $context);
           }
           $serialized->consumeCharacter('}');
@@ -392,11 +392,15 @@
           $instance= new ExceptionReference($serialized->consumeString());
           $size= $serialized->consumeSize();
           $serialized->consumeCharacter('{');
-          $varcontext = $context;
-          $varcontext['serializeAsBasic'] = TRUE;
           for ($i= 0; $i < $size; $i++) {
-            $member= $this->valueOf($serialized, $varcontext);
-            $instance->{$member}= $this->valueOf($serialized, $context);
+            $member= $serialized->consumeIdentifier();
+            $element= $this->valueOf($serialized, $context);
+            if ($element instanceof Integer) {
+              $element = $element->intValue();
+            } else if ($element instanceof String) {
+              $element = $element->toString();
+            }
+            $instance->{$member}= $element;
           }
           $serialized->consumeCharacter('}');
           return $instance;
@@ -411,10 +415,8 @@
             $instance= new UnknownRemoteObject($name);
             $size= $serialized->consumeSize();
             $serialized->consumeCharacter('{');
-            $varcontext = $context;
-            $varcontext['serializeAsBasic'] = TRUE;
             for ($i= 0; $i < $size; $i++) {
-              $member= $this->valueOf($serialized, $varcontext);
+              $member= $serialized->consumeIdentifier();
               $members[$member]= $this->valueOf($serialized, $context);
             }
             $serialized->consumeCharacter('}');
@@ -436,12 +438,9 @@
             $instance= Enum::valueOf($class, $this->valueOf($serialized, $context));
           } else {
             $instance= $class->newInstance();
-            $varcontext = $context;
-            $varcontext['serializeAsBasic'] = TRUE;
             for ($i= 0; $i < $size; $i++) {
-              $member= $this->valueOf($serialized, $varcontext);
-              $temp = $this->valueOf($serialized, $context);
-              $instance->{$member} = $temp;
+              $member= $serialized->consumeIdentifier();
+              $instance->{$member} = $this->valueOf($serialized, $context);
             }
           }
           
@@ -464,8 +463,9 @@
 
         default: {      // default, check if we have a mapping
           if (!($mapping= $this->mapping($token, $m= NULL))) {
+            print_r($instance, $output);
             throw new FormatException(
-              'Cannot deserialize unknown type "'.$token.'" ('.$serialized->toString().')'
+              'Cannot deserialize unknown type "'.$token.'" ('.$serialized->toString().') '.$output
             );
           }
 
