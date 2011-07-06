@@ -395,7 +395,7 @@
           for ($i= 0; $i < $size; $i++) {
             $member= $serialized->consumeIdentifier();
             $element= $this->valueOf($serialized, $context);
-            if ($element instanceof Integer) {
+            if ($element instanceof Number) {
               $element = $element->intValue();
             } else if ($element instanceof String) {
               $element = $element->toString();
