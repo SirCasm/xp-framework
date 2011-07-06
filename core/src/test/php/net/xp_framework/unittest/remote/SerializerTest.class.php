@@ -226,7 +226,7 @@
      */
     #[@test]
     public function representationOfDate() {
-      $this->assertEquals('T:1122644265;', $this->serializer->representationOf(new Date(1122644265)));
+      $this->assertEquals('T:20050729T153745+0200;', $this->serializer->representationOf(new Date(1122644265)));
     }
 
     /**

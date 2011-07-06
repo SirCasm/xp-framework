@@ -31,12 +31,12 @@
      * Returns an on-the-wire representation of the given value
      *
      * @param   server.protocol.Serializer serializer
-     * @param   lang.Object value
+     * @param   util.Date value
      * @param   [:var] context default array()
      * @return  string
      */
     public function representationOf($serializer, $value, $context= array()) {
-      return 'T:'.$value->getTime().';';
+      return 'T:'.$value->format('%Y%m%dT%H%M%S%Z').';';
     }
     
     /**
