@@ -29,10 +29,10 @@
       $class= XPClass::forName($serializer->exceptionName($serialized->consumeString()));
 
       $size= $serialized->consumeSize();
-      $serialized->offset++;  // Opening "{"
+      $serialized->consumeCharacter('{');  // Opening "{"
       $data= array();
       for ($i= 0; $i < $size; $i++) {
-        $member= $serializer->valueOf($serialized, $context);
+        $member= $serialized->consumeIdentifier();
         $element = $serializer->valueOf($serialized, $context);
         if ($member == 'trace') {
           $element= $element->elements();
@@ -41,7 +41,7 @@
         }
         $data[$member]= $element;
       }
-      $serialized->offset++; // Closing "}"
+      $serialized->consumeCharacter('}'); // Closing "}"
       
       $instance= $class->newInstance($data['message']);
       unset($data['message']);

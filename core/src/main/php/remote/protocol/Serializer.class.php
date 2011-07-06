@@ -57,9 +57,7 @@
       $this->mappings['f']= new FloatMapping();
       $this->mappings['d']= new DoubleMapping();
       $this->mappings['i']= new IntegerMapping();
-      $this->mappings['A']= new ArrayListMapping();
       $this->mappings['e']= new ExceptionMapping();
-      $this->mappings['E']= new ExceptionMapping();
       $this->mappings['t']= new StackTraceElementMapping();
       $this->mappings['Y']= new ByteArrayMapping();
       $this->mappings['M']= new HashTableMapping();
@@ -112,11 +110,12 @@
           return 's:'.strlen($encoded).':"'.$encoded.'";';
 
         case 'array':
-          $s= 'a:'.sizeof($var).':{';
+          $hashtable = create('new HashTable<Object,Object>');
           foreach (array_keys($var) as $key) {
-            $s.= serialize($key).$this->representationOf($var[$key], $ctx);
+            $hashtable->put(Primitive::boxed($key), Primitive::boxed($var[$key]));
           }
-          return $s.'}';
+         
+          return $this->representationOf($hashtable, $ctx);
 
         case 'resource': 
           return ''; // Ignore (resources can't be serialized)
@@ -345,8 +344,6 @@
         'S'   => new ClassReference('lang.types.Short'),
         'f'   => new ClassReference('lang.types.Float'),
         'l'   => new ClassReference('lang.types.Long'),
-        'a'   => 'array',
-        'A'   => new ClassReference('lang.types.ArrayList'),
         'T'   => new ClassReference('util.Date')
       );
       $token= $serialized->consumeSize();
@@ -374,18 +371,6 @@
         case 's': {     // strings
           $value = new String($serialized->consumeString());
           return $value;
-        }
-
-        case 'a': {     // untyped map
-          $a= array();
-          $size= $serialized->consumeSize();
-          $serialized->consumeCharacter('{');
-          for ($i= 0; $i < $size; $i++) {
-            $key= $this->valueOf($serialized, $context);
-            $a[$key]= $this->valueOf($serialized, $context);
-          }
-          $serialized->consumeCharacter('}');
-          return $a;
         }
 
         case 'E': {     // generic exceptions
@@ -463,9 +448,8 @@
 
         default: {      // default, check if we have a mapping
           if (!($mapping= $this->mapping($token, $m= NULL))) {
-            print_r($instance, $output);
             throw new FormatException(
-              'Cannot deserialize unknown type "'.$token.'" ('.$serialized->toString().') '.$output
+              'Cannot deserialize unknown type "'.$token.'" ('.$serialized->toString().') '
             );
           }
 

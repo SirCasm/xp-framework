@@ -468,7 +468,7 @@
      *
      * @see     xp://Person
      */
-    #[@test]
+/*    #[@test]
     public function valueOfArrayList() {
       $return= $this->serializer->valueOf(
         new SerializedData('A:2:{O:39:"net.xp_framework.unittest.remote.Person":2:{2:id;i:1549;4:name;s:11:"Timm Friebe";}s:5:"World";}'
@@ -477,7 +477,7 @@
       $this->assertEquals(2, $return->length);
       $this->assertEquals(new net·xp_framework·unittest·remote·Person(), $return[0]);
       $this->assertEquals(new String('World'), $return[1]);
-    }
+    } */
 
     /**
      * Test serialization of a Bytes object
@@ -508,7 +508,7 @@
      * Test deserialization of an encapsed arraylist
      *
      */
-    #[@test]
+/*    #[@test]
     public function arrayList() {
       $list= $this->serializer->valueOf(
         new SerializedData('A:1:{a:2:{s:2:"la";s:2:"la";s:3:"foo";A:2:{a:1:{s:13:"verschachteln";s:7:"istToll";}s:6:"barbar";}}}')
@@ -522,7 +522,7 @@
           )
         ))
       );
-    }
+    } */
 
     /**
      * Test deserialization of a classreference
