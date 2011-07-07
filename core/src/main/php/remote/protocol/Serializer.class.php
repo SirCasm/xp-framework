@@ -45,6 +45,25 @@
     public
       $_classMapping  = array();
 
+    public $typeMapping = array(
+      'string'                      => 's',
+      'int'                         => 'i',
+      'double'                      => 'd',
+      'boolean'                     => 'b',
+      'NULL'                        => 'N',
+      '<null>'                      => 'N',
+      'util.collections.HashTable'  => 'M',
+      'util.collections.Vector'     => 'V',
+      'util.collections.HashSet'    => 'ST',
+      'lang.types.Integer'          => 'i',
+      'lang.types.Double'           => 'd',
+      'lang.types.Short'            => 'S',
+      'lang.types.Long'             => 'l',
+      'lang.types.String'           => 's',
+      'lang.types.Integer'          => 'i',
+      'lang.types.Integer'          => 'i'
+    );
+
     /**
      * Constructor. Initializes the default mappings
      *
@@ -75,6 +94,39 @@
       $this->exceptions['ClassNotFound']= 'lang.ClassNotFoundException';
       $this->exceptions['NullPointer']= 'lang.NullPointerException';
     }
+
+    /**
+     * Serialize the types of the generic arguments
+     *
+     */
+    public function serializeTypes(XPClass $definition) {
+      $serializedTypes = '';
+      $name = $definition->getName();
+      $genericArguments = $definition->genericArguments();
+      $size = sizeof($genericArguments);
+      $i = 1;
+      foreach ($genericArguments as $comp)
+      {
+        if ($comp instanceof Primitive) {
+          $serializedTypes .= $this->typeMapping[$comp->getName()];
+        } else if ($comp->isGeneric()) {
+          $name = $comp->genericDefinition()->getName();
+          $serializedTypes .= $this->typeMapping[$name].':['.$this->serializeTypes($comp).']';
+        } else if (!isset($this->typeMapping[$comp->getName()])) {
+          $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
+        } else { 
+          $serializedTypes .= $this->typeMapping[$comp->getName()];
+        }
+
+        // Add separator
+        if ($i < $size) {
+          $serializedTypes .= ';';
+        }
+        $i++; // increment counter
+      }
+
+      return $serializedTypes;
+   }
 
     /**
      * Retrieve serialized representation of a variable
@@ -156,30 +208,28 @@
     public function typeFor($serialized) {
       $classString = '';
       $token = $serialized->consumeNextToken();
+
+Console::writeLine('Token: '.$token);
       switch ($token) {
         case 'M':
           $baseType = $this->mappings[$token]->handledClass()->getName();
+          $serialized->consumeCharacter(':');
           $serialized->consumeCharacter('[');
           $typeOne = $this->typeFor($serialized);
-          if ($serialized->getCharacter() == ';') {
-            $serialized->consumeCharacter(';');
-          }
-
+          $serialized->consumeCharacter(';');
           $typeTwo = $this->typeFor($serialized); 
-          if ($serialized->getCharacter() == ';') {
-            $serialized->consumeCharacter(';');
-          }
           $serialized->consumeCharacter(']');
           return sprintf('%s<%s,%s>', $baseType, $typeOne, $typeTwo);
         break;
         case 'V':
         case 'ST':
           $baseType = $this->mappings[$token]->handledClass()->getName();
+          
+          Console::writeLine('Curr char: '.$serialized->getCharacter(0));
+          Console::writeLine('Next char: '.$serialized->getCharacter(1));
+          $serialized->consumeCharacter(':');
           $serialized->consumeCharacter('[');
           $argType = $this->typeFor($serialized);
-          if ($serialized->getCharacter() == ';') {
-            $serialized->consumeCharacter(';');
-          }
           $serialized->consumeCharacter(']');
           return sprintf('%s<%s>', $baseType, $argType);
         break;
@@ -200,7 +250,7 @@
         return $classString;
         break;
         default:
-          Console::writeLine('Error found character: '.$token);
+          throw new FormatException('Error found character: '.$token);
         break;
       }
     }

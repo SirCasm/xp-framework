@@ -199,6 +199,28 @@
       );
     }
 
+    /**
+     * Test Serialization of a generic HashTable
+     *
+     */
+    #[@test]
+    public function representationOfGenericHashSet() {
+      $vector = create('new HashSet<string>');
+      $vector->add('This');
+      $vector->add('test');
+      $vector->add('data');
+      $vector->add('is');
+      $vector->add('hopefully');
+      $vector->add('sufficient');
+      $vector->add('test');
+      $vector->add('data');
+
+      $this->assertEquals(
+        'ST:[s;]:6:{s:4:"This";s:4:"test";s:4:"data";s:2:"is";s:9:"hopefully";s:10:"sufficient";}',
+        $this->serializer->representationOf($vector)
+      );
+    }
+
 
     /**
      * Test Serialization of a generic HashTable
@@ -464,22 +486,6 @@
     }
 
     /**
-     * Test deserialization of an arraylist
-     *
-     * @see     xp://Person
-     */
-/*    #[@test]
-    public function valueOfArrayList() {
-      $return= $this->serializer->valueOf(
-        new SerializedData('A:2:{O:39:"net.xp_framework.unittest.remote.Person":2:{2:id;i:1549;4:name;s:11:"Timm Friebe";}s:5:"World";}'
-      ));
-      $this->assertClass($return, 'lang.types.ArrayList');
-      $this->assertEquals(2, $return->length);
-      $this->assertEquals(new net·xp_framework·unittest·remote·Person(), $return[0]);
-      $this->assertEquals(new String('World'), $return[1]);
-    } */
-
-    /**
      * Test serialization of a Bytes object
      *
      */
@@ -503,26 +509,6 @@
        $hashmap = create('new HashTable<lang.types.String, lang.types.Double>');
        $this->assertEquals($return, $hashmap);
     }
-
-    /**
-     * Test deserialization of an encapsed arraylist
-     *
-     */
-/*    #[@test]
-    public function arrayList() {
-      $list= $this->serializer->valueOf(
-        new SerializedData('A:1:{a:2:{s:2:"la";s:2:"la";s:3:"foo";A:2:{a:1:{s:13:"verschachteln";s:7:"istToll";}s:6:"barbar";}}}')
-      );
-      $this->assertEquals($list, new ArrayList(
-        array(
-          'la'  => new String('la'),
-          'foo' => new ArrayList(
-            array('verschachteln' => new String('istToll')),
-            new String('barbar')
-          )
-        ))
-      );
-    } */
 
     /**
      * Test deserialization of a classreference

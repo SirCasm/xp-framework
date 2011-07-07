@@ -23,7 +23,7 @@
      * @return  var
      */
     public function valueOf($serializer, $serialized, $context= array()) {
-      $value= new Date((int)$serialized->consumeWord());
+      $value= new Date((string)$serialized->consumeWord());
       return $value;
     }
 

@@ -13,26 +13,6 @@
    * @purpose  Mapping
    */
   class HashSetMapping extends Object implements SerializerMapping {
-    protected $typeMapping = array(
-      'string'                      => 's',
-      'int'                         => 'i',
-      'double'                      => 'd',
-      'boolean'                     => 'b',
-      'bool'                        => 'b',
-      'NULL'                        => 'N',
-      '<null>'                      => 'N',
-      'util.collections.HashTable'  => 'M',
-      'util.collections.HashSet'    => 'ST',
-      'util.collections.Vector'     => 'V',
-      'lang.types.Integer'          => 'i',
-      'lang.types.Double'           => 'd',
-      'lang.types.Short'            => 'S',
-      'lang.types.Long'             => 'l',
-      'lang.types.Boolean'          => 'b',
-      'lang.types.String'           => 's',
-      'lang.types.Byte'             => 'B',
-    );
-
 
     /**
      * Returns a value for the given serialized string
@@ -69,8 +49,8 @@
     public function representationOf($serializer, $value, $context= array()) {
         $serializedTypes = '';
         $genericArguments = $value->getClass()->genericArguments();
-        $serializedTypes .= $this->serializeTypes($value->getClass());
-        return $this->typeMapping[$value->getClass()->genericDefinition()->getName()].':['.$serializedTypes.']:'.$value->size().':{'.$this->serializeContent($serializer, $value).'}';
+        $serializedTypes .= $serializer->serializeTypes($value->getClass());
+        return $serializer->typeMapping[$value->getClass()->genericDefinition()->getName()].':['.$serializedTypes.']:'.$value->size().':{'.$this->serializeContent($serializer, $value).'}';
     }
 
 
@@ -87,33 +67,6 @@
       }
       return $serialized;
     }
-    
-    /**
-     * Serialize the types of the generic arguments
-     *
-     */
-    protected function serializeTypes(XPClass $definition) {
-      $serializedTypes = '';
-      $name = $definition->getName();
-      $genericArguments = $definition->genericArguments();
-      foreach ($genericArguments as $comp)
-      {
-        if ($comp instanceof Primitive) {
-          $serializedTypes .= $this->typeMapping[$comp->getName()];
-        } else if ($comp->isGeneric()) {
-          $name = $comp->genericDefinition()->getName();
-          $serializedTypes .= $this->typeMapping[$name].':['.$this->serializeTypes($comp).']';
-        } else if (!isset($this->typeMapping[$comp->getName()])) {
-          $serializedTypes .= 'O:'.strlen($comp->getName()).':"'.$comp->getName().'"';
-        } else { 
-          $serializedTypes .= $this->typeMapping[$comp->getName()];
-        }
-        // Add separator
-        $serializedTypes .= ';';
-      } 
-
-      return $serializedTypes;
-   }
     
     /**
      * Return XPClass object of class supported by this mapping

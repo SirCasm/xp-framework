@@ -13,7 +13,8 @@
   class SerializedData extends Object {
     public
       $buffer= '',
-      $offset= 0;
+      $offset= 0,
+      $length;
 
     /**
      * Constructor
@@ -23,6 +24,7 @@
     public function __construct($buffer) {
       $this->buffer= $buffer;
       $this->offset= 0;
+      $this->length= strlen($buffer);
     }
 
     /**
@@ -59,19 +61,53 @@
       return $v;
     }
 
-    public function consumeNextToken() {
-      $colonpos = strpos($this->buffer, ':', $this->offset);
-      $semipos  = strpos($this->buffer, ';', $this->offset);
-      $colonpos = $colonpos === FALSE ? $semipos+1 : $colonpos;
-      $v= substr(
-        $this->buffer, 
-        $this->offset, 
-        ($colonpos < $semipos ? $colonpos : $semipos) - $this->offset
-      );
-     
-      $this->offset+= strlen($v)+ 1;  // +1 to set the marker behind
-      return $v;
+    /**
+     *
+     *
+     *
+     *
+     */
+    public function consumeNumberOfCharacters($i) {
+      $t = substr($this->buffer, $this->offset, $i);
+      $this->offset += strlen($t)+1;
 
+      return $t;
+    }
+
+    public function getPositionOfNextToken() {
+      $found = FALSE;
+      $pos = 1;
+      while ($found == FALSE && $this->length > ($this->offset + $pos)) {
+
+Console::writeLine('char: '.$this->buffer{$this->offset+$pos});
+        switch ($this->buffer{$this->offset+$pos}) {
+          case ':':
+          case ';':
+          case ']':
+            $found = TRUE;
+          break;
+          default:
+            $pos++;
+          break;
+        }
+      }
+      
+      return $found == TRUE ? $pos : FALSE;
+    }
+
+    /**
+     *
+     *
+     *
+     *
+     */
+    public function consumeNextToken() {
+      $i = $this->getPositionOfNextToken();
+
+      $t = substr($this->buffer, $this->offset, $i);
+      $this->offset += $i;
+
+      return $i === FALSE ? FALSE : $t;
     }
 
     /**
@@ -97,7 +133,7 @@
         return;
       }
 
-      throw new IllegalStateException(sprintf('Expected "%s" character, found "%s" instead. Offset %d.', $chr, $this->buffer{$this->offset}, $this->offset));
+      throw new IllegalStateException(sprintf('Expected "%s" character, found "%s" instead. Offset %d. Object: %s', $chr, $this->buffer{$this->offset}, $this->offset, $this->toString()));
       
     }
 

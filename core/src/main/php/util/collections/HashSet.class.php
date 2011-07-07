@@ -100,7 +100,7 @@
      */
     #[@generic(params= 'T')]
     public function add($element) { 
-      $h= $element instanceof Generic ? $element->hashCode() : (is_array($element) ? serialize($element) : $element);
+      $h= $element instanceof Generic ? $element->hashCode() : serialize($element);
       if (isset($this->_elements[$h])) return FALSE;
 
       $this->_hash+= HashProvider::hashOf($h);
