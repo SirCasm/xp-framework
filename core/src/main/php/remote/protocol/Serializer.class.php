@@ -61,7 +61,7 @@
       'lang.types.Long'             => 'l',
       'lang.types.String'           => 's',
       'lang.types.Integer'          => 'i',
-      'lang.types.Integer'          => 'i'
+      'lang.StackTraceElement'      => 't'
     );
 
     /**
@@ -208,8 +208,6 @@
     public function typeFor($serialized) {
       $classString = '';
       $token = $serialized->consumeNextToken();
-
-Console::writeLine('Token: '.$token);
       switch ($token) {
         case 'M':
           $baseType = $this->mappings[$token]->handledClass()->getName();
@@ -224,9 +222,6 @@ Console::writeLine('Token: '.$token);
         case 'V':
         case 'ST':
           $baseType = $this->mappings[$token]->handledClass()->getName();
-          
-          Console::writeLine('Curr char: '.$serialized->getCharacter(0));
-          Console::writeLine('Next char: '.$serialized->getCharacter(1));
           $serialized->consumeCharacter(':');
           $serialized->consumeCharacter('[');
           $argType = $this->typeFor($serialized);
@@ -234,7 +229,9 @@ Console::writeLine('Token: '.$token);
           return sprintf('%s<%s>', $baseType, $argType);
         break;
         case 'O':
-          $classString = $serialized->consumeString();
+          $serialized->consumeCharacter(':');
+          $classString = $serialized->consumeTypeString();
+          Console::writeLine($classString);
           return $classString;
         break;
         case 's':

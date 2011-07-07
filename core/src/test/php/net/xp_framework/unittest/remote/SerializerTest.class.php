@@ -129,7 +129,7 @@
     #[@test]
     public function representationOfIntegerArray() {
       $this->assertEquals(
-        'M:[O:11:"lang.Object";O:11:"lang.Object";]:3:{i:0;i:1;i:1;i:2;i:2;i:5;}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object"]:3:{i:0;i:1;i:1;i:2;i:2;i:5;}',
         $this->serializer->representationOf($var= array(1, 2, 5))
       );
     }
@@ -142,7 +142,7 @@
     #[@test]
     public function representationOfStringArray() {
       $this->assertEquals(
-        'M:[O:11:"lang.Object";O:11:"lang.Object";]:2:{i:0;s:4:"More";i:1;s:5:"Power";}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object"]:2:{i:0;s:4:"More";i:1;s:5:"Power";}',
         $this->serializer->representationOf($var= array('More', 'Power'))
       );
     }
@@ -159,13 +159,13 @@
       $hashmap->put('keythree', 'valuethree');
 
       $this->assertEquals(
-        'M:[s;s;]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
+        'M:[s;s]:3:{s:6:"keyone";s:8:"valueone";s:6:"keytwo";s:8:"valuetwo";s:8:"keythree";s:10:"valuethree";}',
         $this->serializer->representationOf($hashmap)
       );
 
       $hashmap = create('new HashTable<HashTable<string, HashTable<string,string>>, HashTable<integer,string>>');
       $this->assertEquals(
-        'M:[M:[s;M:[s;s;];];M:[i;s;];]:0:{}',
+        'M:[M:[s;M:[s;s]];M:[i;s]]:0:{}',
         $this->serializer->representationOf($hashmap)
       );
 
@@ -180,7 +180,7 @@
       $hashmap->put('test', $innerHashMap);
 
       $this->assertEquals(
-        'M:[s;M:[s;i;];]:1:{s:4:"test";M:[s;i;]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
+        'M:[s;M:[s;i]]:1:{s:4:"test";M:[s;i]:6:{s:4:"test";i:1;s:5:"test2";i:7;s:5:"test3";i:6;s:5:"test4";i:5;s:5:"test5";i:4;s:5:"test6";i:3;}}',
         $this->serializer->representationOf($hashmap)
       );
     }
@@ -194,7 +194,7 @@
       $hashmap = create('new HashSet<HashTable<Vector<string>,HashSet<int>>>');
 
       $this->assertEquals(
-        'ST:[M:[V:[s;];ST:[i;];];]:0:{}',
+        'ST:[M:[V:[s];ST:[i]]]:0:{}',
         $this->serializer->representationOf($hashmap)
       );
     }
@@ -216,7 +216,7 @@
       $vector->add('data');
 
       $this->assertEquals(
-        'ST:[s;]:6:{s:4:"This";s:4:"test";s:4:"data";s:2:"is";s:9:"hopefully";s:10:"sufficient";}',
+        'ST:[s]:6:{s:4:"This";s:4:"test";s:4:"data";s:2:"is";s:9:"hopefully";s:10:"sufficient";}',
         $this->serializer->representationOf($vector)
       );
     }
@@ -237,7 +237,7 @@
       $vector->add('data');
 
       $this->assertEquals(
-        'V:[s;]:6:{s:4:"This";s:2:"is";s:9:"hopefully";s:10:"sufficient";s:4:"test";s:4:"data";}',
+        'V:[s]:6:{s:4:"This";s:2:"is";s:9:"hopefully";s:10:"sufficient";s:4:"test";s:4:"data";}',
         $this->serializer->representationOf($vector)
       );
     }
@@ -262,7 +262,7 @@
       $h->put('number', '6100');
 
       $this->assertEquals(
-        'M:[O:11:"lang.Object";O:11:"lang.Object";]:2:{s:3:"key";s:5:"value";s:6:"number";s:4:"6100";}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object"]:2:{s:3:"key";s:5:"value";s:6:"number";s:4:"6100";}',
         $this->serializer->representationOf($h)
       );
     }
@@ -278,7 +278,7 @@
       $h->put('number', 6100);
 
       $this->assertEquals(
-        'M:[O:11:"lang.Object";O:11:"lang.Object";]:2:{s:3:"key";s:5:"value";s:6:"number";i:6100;}',
+        'M:[O:11:"lang.Object";O:11:"lang.Object"]:2:{s:3:"key";s:5:"value";s:6:"number";i:6100;}',
         $this->serializer->representationOf($h)
       );
     }
@@ -304,7 +304,7 @@
     #[@test]
     public function representationOfGenericException() {
       $this->assertEquals(
-        'E:16:"lang.XPException":3:{7:message;s:17:"Generic Exception";5:trace;V:[t;]:9:{t:4:{4:file;N:5:class;s:14:"SerializerTest";6:method;s:32:"representationOfGenericException";4:line;i:0;}t:4:{4:file;s:16:"Method.class.php";5:class;s:20:"php.ReflectionMethod";6:method;s:10:"invokeArgs";4:line;i:102;}t:4:{4:file;s:19:"TestSuite.class.php";5:class;s:19:"lang.reflect.Method";6:method;s:6:"invoke";4:line;i:266;}t:4:{4:file;s:19:"TestSuite.class.php";5:class;s:18:"unittest.TestSuite";6:method;s:11:"runInternal";4:line;i:473;}t:4:{4:file;s:16:"Runner.class.php";5:class;s:18:"unittest.TestSuite";6:method;s:3:"run";4:line;i:236;}t:4:{4:file;s:16:"Runner.class.php";5:class;s:18:"xp.unittest.Runner";6:method;s:3:"run";4:line;i:247;}t:4:{4:file;N:5:class;s:18:"xp.unittest.Runner";6:method;s:4:"main";4:line;i:0;}t:4:{4:file;s:16:"Method.class.php";5:class;s:20:"php.ReflectionMethod";6:method;s:10:"invokeArgs";4:line;i:102;}t:4:{4:file;s:9:"class.php";5:class;s:19:"lang.reflect.Method";6:method;s:6:"invoke";4:line;i:90;}}5:cause;N:}',
+        'E:16:"lang.XPException":3:{7:message;s:17:"Generic Exception";5:trace;V:[t]:9:{t:4:{4:file;N:5:class;s:14:"SerializerTest";6:method;s:32:"representationOfGenericException";4:line;i:0;}t:4:{4:file;s:16:"Method.class.php";5:class;s:20:"php.ReflectionMethod";6:method;s:10:"invokeArgs";4:line;i:102;}t:4:{4:file;s:19:"TestSuite.class.php";5:class;s:19:"lang.reflect.Method";6:method;s:6:"invoke";4:line;i:266;}t:4:{4:file;s:19:"TestSuite.class.php";5:class;s:18:"unittest.TestSuite";6:method;s:11:"runInternal";4:line;i:473;}t:4:{4:file;s:16:"Runner.class.php";5:class;s:18:"unittest.TestSuite";6:method;s:3:"run";4:line;i:236;}t:4:{4:file;s:16:"Runner.class.php";5:class;s:18:"xp.unittest.Runner";6:method;s:3:"run";4:line;i:247;}t:4:{4:file;N:5:class;s:18:"xp.unittest.Runner";6:method;s:4:"main";4:line;i:0;}t:4:{4:file;s:16:"Method.class.php";5:class;s:20:"php.ReflectionMethod";6:method;s:10:"invokeArgs";4:line;i:102;}t:4:{4:file;s:9:"class.php";5:class;s:19:"lang.reflect.Method";6:method;s:6:"invoke";4:line;i:90;}}5:cause;N:}',
         $this->serializer->representationOf(new XPException('Generic Exception'))
       );
     }
@@ -467,7 +467,7 @@
       $exception= $this->serializer->valueOf(new SerializedData(
         'E:46:"java.lang.reflect.UndeclaredThrowableException":3:{'.
         '7:message;s:12:"*** BLAM ***";'.
-        '5:trace;V:[t;]:1:{t:4:{4:file;s:9:"Test.java";5:class;s:4:"Test";6:method;s:4:"main";4:line;i:10;}}'.
+        '5:trace;V:[t]:1:{t:4:{4:file;s:9:"Test.java";5:class;s:4:"Test";6:method;s:4:"main";4:line;i:10;}}'.
         '5:cause;N:'.
         '}'
       ));
@@ -504,7 +504,7 @@
     #[@test]
     public function valueOfGenericHashtable() {
 
-       $return = $this->serializer->valueOf(new SerializedData('M:[O:17:"lang.types.String";O:17:"lang.types.Double";]:0:{}'));
+       $return = $this->serializer->valueOf(new SerializedData('M:[O:17:"lang.types.String";O:17:"lang.types.Double"]:0:{}'));
 
        $hashmap = create('new HashTable<lang.types.String, lang.types.Double>');
        $this->assertEquals($return, $hashmap);

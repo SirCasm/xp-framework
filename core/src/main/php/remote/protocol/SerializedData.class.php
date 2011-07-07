@@ -62,6 +62,23 @@
     }
 
     /**
+     * Consume a string ([length]:"[string]")
+     * 
+     * @return  string
+     */
+    public function consumeTypeString() {
+      $l= substr(
+        $this->buffer, 
+        $this->offset, 
+        strpos($this->buffer, ':', $this->offset)- $this->offset
+      );
+      $b= strlen($l)+ 2;              // 1 for ':', 1 for '"'
+      $v= substr($this->buffer, $this->offset + $b, $l);
+      $this->offset+= $b + $l + 1;    // 1 for '"', +1 to set the marker behind
+      return $v;
+    }
+
+    /**
      *
      *
      *
@@ -78,8 +95,6 @@
       $found = FALSE;
       $pos = 1;
       while ($found == FALSE && $this->length > ($this->offset + $pos)) {
-
-Console::writeLine('char: '.$this->buffer{$this->offset+$pos});
         switch ($this->buffer{$this->offset+$pos}) {
           case ':':
           case ';':
