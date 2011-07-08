@@ -45,7 +45,7 @@
     }
     
     /**
-     * Consume a string ([length]:"[string]")
+     * Consume a string ([length]:"[string]";)
      * 
      * @return  string
      */
@@ -76,19 +76,6 @@
       $v= substr($this->buffer, $this->offset + $b, $l);
       $this->offset+= $b + $l + 1;    // 1 for '"', +1 to set the marker behind
       return $v;
-    }
-
-    /**
-     *
-     *
-     *
-     *
-     */
-    public function consumeNumberOfCharacters($i) {
-      $t = substr($this->buffer, $this->offset, $i);
-      $this->offset += strlen($t)+1;
-
-      return $t;
     }
 
     public function getPositionOfNextToken() {
@@ -150,34 +137,6 @@
 
       throw new IllegalStateException(sprintf('Expected "%s" character, found "%s" instead. Offset %d. Object: %s', $chr, $this->buffer{$this->offset}, $this->offset, $this->toString()));
       
-    }
-
-    /**
-     * Consume everything up to the next "[" and return it
-     * 
-     * @param   string stop
-     * @return  string
-     */     
-    public function consumeType() {
-       $v= substr(
-        $this->buffer, 
-        $this->offset, 
-        strpos($this->buffer, '[', $this->offset)- $this->offset
-      ); 
-     
-      $this->offset+= strlen($v)+ 1;  // +1 to set the marker behind
-      return $v;
-    }
-
-    public function consumeTypeEnd() {
-       $v= substr(
-        $this->buffer, 
-        $this->offset, 
-        strpos($this->buffer, ']', $this->offset)- $this->offset
-      ); 
-     
-      $this->offset+= strlen($v)+ 1;  // +1 to set the marker behind
-      return $v;
     }
 
     public function getCharacter($i = 0) {

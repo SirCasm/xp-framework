@@ -231,7 +231,6 @@
         case 'O':
           $serialized->consumeCharacter(':');
           $classString = $serialized->consumeTypeString();
-          Console::writeLine($classString);
           return $classString;
         break;
         case 's':

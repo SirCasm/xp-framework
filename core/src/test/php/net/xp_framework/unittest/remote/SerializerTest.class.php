@@ -205,19 +205,19 @@
      */
     #[@test]
     public function representationOfGenericHashSet() {
-      $vector = create('new HashSet<string>');
-      $vector->add('This');
-      $vector->add('test');
-      $vector->add('data');
-      $vector->add('is');
-      $vector->add('hopefully');
-      $vector->add('sufficient');
-      $vector->add('test');
-      $vector->add('data');
+      $hashset = create('new HashSet<string>');
+      $hashset->add('This');
+      $hashset->add('test');
+      $hashset->add('data');
+      $hashset->add('is');
+      $hashset->add('hopefully');
+      $hashset->add('sufficient');
+      $hashset->add('test');
+      $hashset->add('data');
 
       $this->assertEquals(
         'ST:[s]:6:{s:4:"This";s:4:"test";s:4:"data";s:2:"is";s:9:"hopefully";s:10:"sufficient";}',
-        $this->serializer->representationOf($vector)
+        $this->serializer->representationOf($hashset)
       );
     }
 
