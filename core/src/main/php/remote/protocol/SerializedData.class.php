@@ -77,8 +77,14 @@
       $this->offset+= $b + $l + 1;    // 1 for '"', +1 to set the marker behind
       return $v;
     }
-
-    public function getPositionOfNextToken() {
+    
+    /**
+     * Searches for the first occurence of one of 
+     * the three separators
+     *
+     * @return int Position of the next Separator
+     */
+    public function getPositionOfNextSeparator() {
       $found = FALSE;
       $pos = 1;
       while ($found == FALSE && $this->length > ($this->offset + $pos)) {
@@ -98,13 +104,12 @@
     }
 
     /**
+     * Consumes the next token
      *
-     *
-     *
-     *
+     * @return string the next Token
      */
     public function consumeNextToken() {
-      $i = $this->getPositionOfNextToken();
+      $i = $this->getPositionOfNextSeparator();
 
       $t = substr($this->buffer, $this->offset, $i);
       $this->offset += $i;
