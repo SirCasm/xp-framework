@@ -134,16 +134,26 @@
       return $v;
     }
 
+    /**
+     * Read an character 'chr' and omits it
+     *
+     * @throws IllegalStateException when the given character
+     *         doesn't match the charater in the buffer
+     */
     public function consumeCharacter($chr) {
       if ($this->buffer{$this->offset} == $chr) {
         $this->offset++;
         return;
       }
-
       throw new IllegalStateException(sprintf('Expected "%s" character, found "%s" instead. Offset %d. Object: %s', $chr, $this->buffer{$this->offset}, $this->offset, $this->toString()));
       
     }
 
+    /**
+     * Gets the i's character from the current offset
+     *
+     * @return char at offset + i
+     */
     public function getCharacter($i = 0) {
       return $this->buffer{$this->offset + $i};
     }

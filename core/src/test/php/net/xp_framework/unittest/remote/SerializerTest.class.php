@@ -428,7 +428,7 @@
     public function valueOfDates() {
       $this->assertEquals(
         new Date(328312800),
-        $this->serializer->valueOf(new SerializedData('T:328312800;'))
+        $this->serializer->valueOf(new SerializedData('T:19800528T000000+0200;'))
       );
     }
 

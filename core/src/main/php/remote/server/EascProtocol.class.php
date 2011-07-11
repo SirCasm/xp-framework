@@ -11,8 +11,10 @@
     'remote.server.ServerHandler',
     'remote.server.RemoteObjectMap',
     'remote.server.deploy.Deployer',
+    'remote.server.message.EascFeaturesAvailableMessage',
     'io.sys.ShmSegment',
-    'peer.server.ServerProtocol'
+    'peer.server.ServerProtocol',
+    'util.collections.HashTable'
   );
   
   /**
@@ -160,7 +162,18 @@
      *
      * @param   peer.Socket socket
      */
-    public function handleConnect($socket) { }
+    public function handleConnect($socket) {
+      $hashtable = create('new HashTable<string, HashTable<string, string>>');
+      $tokens = create('new HashTable<string, string>');
+      foreach ($this->serializer->typeMapping as $key => $value)
+      {
+        $tokens->put($key, $value);
+      }
+      $hashtable->put('tokens', $tokens);
+      $message = new EascFeaturesAvailableMessage();
+      $message->setValue($hashtable);
+      $this->answerWithMessage($socket, $message);
+    }
 
     /**
      * Handle client disconnect
