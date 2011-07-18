@@ -25,7 +25,8 @@
     public function setSerializer($serializer) {
       $this->serializer= $serializer;
     }  
-  
+
+
     /**
      * Handle incoming data
      *
@@ -38,7 +39,6 @@
       try {
         $handler= EascMessageFactory::forType($type);
         $handler->handle($protocol, $data);
-
         $response= EascMessageFactory::forType(REMOTE_MSG_VALUE);
         $response->setValue($handler->getValue());
 
@@ -46,7 +46,6 @@
         $response= EascMessageFactory::forType(REMOTE_MSG_EXCEPTION);
         $response->setValue($e);
       }
-
       $protocol->answerWithMessage($socket, $response);
     }
   }

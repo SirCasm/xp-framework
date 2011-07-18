@@ -35,13 +35,19 @@
     public function handle($protocol, $data) {
       $oid= unpack('Nzero/Noid', substr($data, 0, 8));
       $p= $protocol->context[RemoteObjectMap::CTX_KEY]->getByOid($oid['oid']);
-
       $offset= 8;
       $method= $protocol->readString($data, $offset);
-      
       $offset+= 2;  // ?
-      $args= $protocol->serializer->valueOf(new SerializedData($protocol->readString($data, $offset)), $protocol->context);
-      $this->setValue(call_user_func_array(array($p, $method), $args->values));
+      $this->cat = Logger::getInstance()->getCategory();
+      $data = new SerializedData($protocol->readString($data, $offset));
+      $this->cat->infof('Data %s', xp::stringOf($data));
+      $args= $protocol->serializer->valueOf($data, $protocol->context);
+      $arguments = array();
+      foreach ($args->values->keys() as $key) {
+        $arguments[] = $args->values[$key]; 
+      }
+      $this->cat->infof('arguments %s method %s', xp::stringOf($arguments), xp::stringOf(array($p, $method)));
+      $this->setValue(call_user_func_array(array($p, $method), $arguments));
     }
   }
 ?>

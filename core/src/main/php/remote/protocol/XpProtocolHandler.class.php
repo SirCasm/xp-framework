@@ -8,10 +8,14 @@
     'peer.BSDSocket',
     'remote.RemoteInvocationHandler',
     'remote.protocol.ByteCountedString',
-    'remote.protocol.Serializer',
+    'remote.protocol.ProtocolHandler',
     'remote.protocol.RemoteInterfaceMapping',
+    'remote.protocol.Serializer',
     'remote.protocol.XpProtocolConstants',
-    'remote.protocol.ProtocolHandler'
+    'remote.server.features.AuthenticationFeature',
+    'remote.server.features.FeatureContainer',
+    'remote.server.features.SupportedTokens',
+    'util.log.ConsoleAppender'
   );
 
   /**
@@ -25,6 +29,7 @@
       $versionMajor   = 0,
       $versionMinor   = 0,
       $serializer     = NULL,
+      $supportedFeatures = NULL,
       $cat            = NULL;
     
     public
@@ -35,10 +40,11 @@
      *
      */
     public function __construct() {
-    
+      $this->cat = Logger::getInstance()->getCategory()->withAppender(new ConsoleAppender());
+      $this->supportedFeatures = new FeatureContainer();
       // Create a serializer for this protocol handler
       $this->serializer= new Serializer();
-      
+      $this->supportedFeatures->addFeature('tokens', new SupportedTokens($this->serializer->typeMapping)); 
       // Register default mappings / exceptions / packages
       $this->serializer->mapping('I', new RemoteInterfaceMapping());
       $this->serializer->exceptionName('naming/NameNotFound', 'remote.NameNotFoundException');
@@ -70,7 +76,7 @@
      */
     public function initialize($proxy) {
       sscanf(
-        $proxy->getParam('version', '1.0'), 
+        $proxy->getParam('version', '2.0'), 
         '%d.%d', 
         $this->versionMajor, 
         $this->versionMinor
@@ -84,7 +90,8 @@
         'sec'   => 2,
         'usec'  => 0
       ));
-      
+      // If a user was supplied, add authentication to the
+      // feature-list
       if ($user= $proxy->getUser()) {
         $this->cat && $this->cat->infof(
           '>>> %s(%s:%d) INITIALIZE %s',
@@ -93,9 +100,11 @@
           $this->_sock->port,
           $user
         );
-        $r= $this->sendPacket(REMOTE_MSG_INIT, "\1", array(
-          new ByteCountedString($proxy->getUser()),
-          new ByteCountedString($proxy->getPassword())
+        $this->supportedFeatures->addFeature(
+          'auth', 
+          new AuthenticationFeature(
+            $proxy->getUser(), 
+            $proxy->getPassword()
         ));
       } else {
         $this->cat && $this->cat->infof(
@@ -104,14 +113,29 @@
           $this->_sock->host,
           $this->_sock->port
         );
-        $r= $this->sendPacket(REMOTE_MSG_INIT, "\0");
       }
-      
+
+      $header= unpack(
+        'Nmagic/cvmajor/cvminor/ctype/ctran/Nlength', 
+        $this->readBytes(12)
+      );
+      if ($header['magic'] != DEFAULT_PROTOCOL_MAGIC_NUMBER) {
+        throw new IllegalStateException('Server sent wrong magic number');
+      }
+      if ($header['type'] != REMOTE_MSG_FEAT_AVAIL) {
+        throw new IllegalStateException('Server is expected to send available Features after connect.');
+      }
+      $bcs = ByteCountedString::readFrom($this->_sock);
+      $features = $this->serializer->valueOf(new SerializedData($bcs));
+       
+      var_dump($header, $features, $bcs); exit;
       // Reset default socket timeout
       $this->_sock->setOption(SOL_SOCKET, SO_RCVTIMEO, array(
         'sec'   => 60,
         'usec'  => 0
       ));
+
+
       $this->cat && $this->cat->infof('<<< %s', $this->stringOf($r));
     }
     

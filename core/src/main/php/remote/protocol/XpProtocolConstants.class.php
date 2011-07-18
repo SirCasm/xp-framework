@@ -13,12 +13,14 @@
   define('REMOTE_MSG_CALL',      0x0002);
   define('REMOTE_MSG_FINALIZE',  0x0003);
   define('REMOTE_MSG_TRAN_OP',   0x0004);
-  define('REMOTE_MSG_FEAT_AVAIL',0x0005);
+  define('REMOTE_MSG_FEAT_AVAIL',0x0008);
+  define('REMOTE_MSG_FEAT_USED ',0x0009);
   
   // Response messages
   define('REMOTE_MSG_VALUE',     0x0005);
   define('REMOTE_MSG_EXCEPTION', 0x0006);
   define('REMOTE_MSG_ERROR',     0x0007);
+  define('REMOTE_MSG_CTS',       0x000A);
   
   // Transaction message types
   define('REMOTE_TRAN_BEGIN',    0x0001);
@@ -42,14 +44,18 @@
      */
     public static function nameOfMessage($id) {
       $names= array(
-        REMOTE_MSG_INIT       => 'REMOTE_MSG_INIT',
+        REMOTE_MSG_INIT       => 'REMOTE_MSG_INIT', // Most likely deprecated
         REMOTE_MSG_LOOKUP     => 'REMOTE_MSG_LOOKUP',
         REMOTE_MSG_CALL       => 'REMOTE_MSG_CALL',
         REMOTE_MSG_FINALIZE   => 'REMOTE_MSG_FINALIZE',
         REMOTE_MSG_TRAN_OP    => 'REMOTE_MSG_TRAN_OP',
         REMOTE_MSG_VALUE      => 'REMOTE_MSG_VALUE',
         REMOTE_MSG_EXCEPTION  => 'REMOTE_MSG_EXCEPTION',
-        REMOTE_MSG_ERROR      => 'REMOTE_MSG_ERROR'
+        REMOTE_MSG_ERROR      => 'REMOTE_MSG_ERROR',
+        REMOTE_MSG_FEAT_AVAIL => 'REMOTE_MSG_FEATURES_AVAILABLE',
+        REMOTE_MSG_FEAT_USED  => 'REMOTE_MSG_FEATURES_USED',
+        REMOTE_MSG_CTS        => 'REMOTE_MSG_CLEAR_TO_SEND'
+
       );
       
       return (isset($names[$id])

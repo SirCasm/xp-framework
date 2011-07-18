@@ -46,6 +46,5 @@
     public function invoke($proxy, $method, $args) { 
       return $this->handler->invoke($this->oid, $method, $args);
     }
-  
   } 
 ?>

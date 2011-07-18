@@ -5,16 +5,20 @@
  */
 
   uses(
-    'remote.protocol.ByteCountedString',
-    'remote.protocol.Serializer',
-    'remote.protocol.RemoteInterfaceMapping',
-    'remote.server.ServerHandler',
-    'remote.server.RemoteObjectMap',
-    'remote.server.deploy.Deployer',
-    'remote.server.message.EascFeaturesAvailableMessage',
     'io.sys.ShmSegment',
     'peer.server.ServerProtocol',
-    'util.collections.HashTable'
+    'remote.protocol.ByteCountedString',
+    'remote.protocol.RemoteInterfaceMapping',
+    'remote.protocol.Serializer',
+    'remote.server.deploy.Deployer',
+    'remote.server.features.FeatureContainer',
+    'remote.server.features.SupportedTokens',
+    'remote.server.message.EascFeaturesAvailableMessage',
+    'remote.server.RemoteObjectMap',
+    'remote.server.ServerHandler',
+    'util.collections.HashTable',
+    'util.log.FileAppender',
+    'util.log.Logger'
   );
   
   /**
@@ -28,6 +32,7 @@
     public
       $serializer  = NULL,
       $context     = NULL,
+      $features    = NULL,
       $scanner     = NULL;
 
     /**
@@ -38,9 +43,12 @@
     public function __construct($scanner) {
       $this->serializer= new Serializer();
       $this->serializer->mapping('I', new RemoteInterfaceMapping());
+      $this->features = new FeatureContainer();
+      $this->features->addFeature('tokens', new SupportedTokens($this->serializer->typeMapping));
       $this->context[RemoteObjectMap::CTX_KEY]= new RemoteObjectMap();
       $this->scanner= $scanner;
-
+      $this->cat = Logger::getInstance()->getCategory();
+      $this->cat->withAppender(new FileAppender('/home/rene/devel/easc.log'));
       $this->deployer= new Deployer();
     }
 
@@ -74,7 +82,7 @@
       $packet= pack(
         'Nc4Na*', 
         0x3c872747, 
-        1,
+        2,
         0,
         $type,
         FALSE,
@@ -95,17 +103,15 @@
       $header= pack(
         'Nc4Na*', 
         0x3c872747, 
-        1,
+        2,
         0,
         $type,
         FALSE,
         $bcs->length(),
         ''
       );
-      
-      // Console::writeLine('Header: ', addcslashes($header, "\0..\37!@\177..\377"));
+
       $stream->write($header);
-      // Console::writeLine('Body: ', xp::stringOf($bcs));
       $bcs->writeTo($stream);
     }
     
@@ -163,16 +169,9 @@
      * @param   peer.Socket socket
      */
     public function handleConnect($socket) {
-      $hashtable = create('new HashTable<string, HashTable<string, string>>');
-      $tokens = create('new HashTable<string, string>');
-      foreach ($this->serializer->typeMapping as $key => $value)
-      {
-        $tokens->put($key, $value);
-      }
-      $hashtable->put('tokens', $tokens);
       $message = new EascFeaturesAvailableMessage();
-      $message->setValue($hashtable);
-      $this->answerWithMessage($socket, $message);
+      $message->setValue($this->features->getFeatures());
+      $this->answerWithMessage($socket, $message); 
     }
 
     /**
@@ -189,7 +188,7 @@
      * @return  var
      */
     public function handleData($socket) {
-
+      $this->cat->info('Getting info');
       // Check if socket on eof
       if (NULL === ($bytes= $this->readBytes($socket, 12))) return;
 

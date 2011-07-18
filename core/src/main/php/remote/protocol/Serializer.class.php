@@ -64,6 +64,8 @@
       'lang.StackTraceElement'      => 't'
     );
 
+    public $supportedTokens;
+
     /**
      * Constructor. Initializes the default mappings
      *
@@ -87,12 +89,13 @@
       // as an array. We use HASHMAP as the token, so it will never match
       // another one (can only be one char). This is a little bit hackish.
       $this->mappings['HASHMAP']= new HashmapMapping();
-      
+
       // Setup default exceptions
       $this->exceptions['IllegalArgument']= 'lang.IllegalArgumentException';
       $this->exceptions['IllegalAccess']= 'lang.IllegalAccessException';
       $this->exceptions['ClassNotFound']= 'lang.ClassNotFoundException';
       $this->exceptions['NullPointer']= 'lang.NullPointerException';
+
     }
 
     /**
@@ -237,16 +240,13 @@
           return 'lang.types.String';
         case 'b':
           return 'lang.types.Boolean';
-        case 't':
-        case 'i':
-        case 'd':
-        case 'S':
-        case 'B':
-          $classString = $this->mappings[$token]->handledClass()->getName();
-        return $classString;
-        break;
         default:
-          throw new FormatException('Error found character: '.$token);
+          if (isset($this->mappings[$token])) {
+            $classString = $this->mappings[$token]->handledClass()->getName();
+            return $classString;
+          }
+
+          throw new FormatException('Found no matching type for token: '.$token);
         break;
       }
     }
@@ -313,11 +313,9 @@
         if (!$mapping instanceof SerializerMapping) throw new IllegalArgumentException(
           'Given argument is not a SerializerMapping ('.xp::typeOf($mapping).')'
         );
-
         $this->mappings[$token]= $mapping;
         $this->_classMapping= array();
       }
-      
       return $this->mappings[$token];
     }
     
