@@ -22,13 +22,22 @@
     public function __construct($user= '', $password= '') {
       $this->user= $user;
       $this->password= $password;
-      if ($user != '' && $password != '') {
+      if ($user&& $password) {
         $this->mandatory= TRUE;
       }
     }
 
     public function isMandatory() {
-      return $mandatory;
+      return is_bool($this->mandatory) ? $this->mandatory :  $this->mandatory->value;
+    }
+
+    public function handle(EascFeature $feature) {
+      if (!($feature instanceof self)) {
+        // TODO: Find better Exception type
+        throw new Exception('Given EascFeature is not of type '.$this->getClass()->getClassName());
+      }
+
+      return TRUE;
     }
   }
 ?>

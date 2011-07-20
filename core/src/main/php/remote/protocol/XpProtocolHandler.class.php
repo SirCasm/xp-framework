@@ -14,6 +14,7 @@
     'remote.protocol.XpProtocolConstants',
     'remote.server.features.AuthenticationFeature',
     'remote.server.features.FeatureContainer',
+    'remote.server.features.EascFeatureNotSupportedException',
     'remote.server.features.SupportedTokens',
     'util.log.ConsoleAppender'
   );
@@ -44,7 +45,8 @@
       $this->supportedFeatures = new FeatureContainer();
       // Create a serializer for this protocol handler
       $this->serializer= new Serializer();
-      $this->supportedFeatures->addFeature('tokens', new SupportedTokens($this->serializer->typeMapping)); 
+      $this->supportedFeatures->addFeature(new SupportedTokens($this->serializer->typeMapping)); 
+
       // Register default mappings / exceptions / packages
       $this->serializer->mapping('I', new RemoteInterfaceMapping());
       $this->serializer->exceptionName('naming/NameNotFound', 'remote.NameNotFoundException');
@@ -101,7 +103,6 @@
           $user
         );
         $this->supportedFeatures->addFeature(
-          'auth', 
           new AuthenticationFeature(
             $proxy->getUser(), 
             $proxy->getPassword()
@@ -125,20 +126,73 @@
       if ($header['type'] != REMOTE_MSG_FEAT_AVAIL) {
         throw new IllegalStateException('Server is expected to send available Features after connect.');
       }
-      $bcs = ByteCountedString::readFrom($this->_sock);
-      $features = $this->serializer->valueOf(new SerializedData($bcs));
+
+      $bcs = new SerializedData(ByteCountedString::readFrom($this->_sock));
+
+      $this->cat && $this->cat->infof(
+        '>>> %s(%s:%d) SENT FEATURES: %s', 
+        $this->getClassName(), 
+        $this->_sock->host, 
+        $this->_sock->port, 
+        $bcs->buffer
+      );
+
+
+      // Unserialize the features sent by the server
+      $serverFeatures = $this->serializer->valueOf($bcs);
+
+      $this->checkFeatures($serverFeatures); 
+      // TODO: Handle Features here and send REMOTE_MSG_FEAT_USED
        
-      var_dump($header, $features, $bcs); exit;
       // Reset default socket timeout
       $this->_sock->setOption(SOL_SOCKET, SO_RCVTIMEO, array(
         'sec'   => 60,
         'usec'  => 0
       ));
 
+      // The clients features should be adjusted by now.
+      $bytes = $this->serializer->representationOf($this->supportedFeatures->getFeatures());
 
-      $this->cat && $this->cat->infof('<<< %s', $this->stringOf($r));
+      $this->cat && $this->cat->infof('<<< Sending following features: "%s"', $bytes);
+      $this->sendPacket(REMOTE_MSG_FEAT_USED, '', array($bytes)); 
+
     }
-    
+   
+    /**
+     * This method checks the Client's features against the 
+     * servers features.
+     *
+     *
+     */
+    public function checkFeatures($serverFeatures) {
+      // Keys from the Server and the client are necessary
+      $keys = array_unique(
+        array_merge(
+          $serverFeatures->keys(), 
+          $this->supportedFeatures->getFeatures()->keys()
+      ));
+
+      // Iterate through all features the server offers
+      foreach($keys as $key) {
+        $clientFeature = $this->supportedFeatures->features[$key];
+        $serverFeature = $serverFeatures[$key];
+        // Both exist means the client will activate the feature
+        if($clientFeature && $serverFeature) {
+          $clientFeature->handle($serverFeatures[$key]);
+
+        // Client does not support the feature and it's optional server side
+        } elseif (!$clientFeature && $serverFeatures && !$serverFeature->isMandatory()) {
+          $this->cat && $this->cat->infof('Optional feature "%s" not supported by Client', $key->toString());
+        // Server does not support the feature and it's optional client side
+        } elseif (!$serverFeature && $clientFeature && !$clientFeature->isMandatory()) {
+          $this->supportedFeatures->features->remove($key); 
+          $this->cat && $this->cat->infof('Deactivating the optional feature "%s" on the client', $key->toString());
+        } else {
+          throw new EascFeatureNotSupportedException('Client does not support the mandatory feature: '.$key->toString());
+        }
+      }
+    }
+
     /**
      * Returns a string representation of this object
      *

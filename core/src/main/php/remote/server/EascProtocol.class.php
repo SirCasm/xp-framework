@@ -13,6 +13,7 @@
     'remote.server.deploy.Deployer',
     'remote.server.features.FeatureContainer',
     'remote.server.features.SupportedTokens',
+    'remote.server.features.AuthenticationFeature',
     'remote.server.message.EascFeaturesAvailableMessage',
     'remote.server.RemoteObjectMap',
     'remote.server.ServerHandler',
@@ -44,7 +45,7 @@
       $this->serializer= new Serializer();
       $this->serializer->mapping('I', new RemoteInterfaceMapping());
       $this->features = new FeatureContainer();
-      $this->features->addFeature('tokens', new SupportedTokens($this->serializer->typeMapping));
+      $this->features->addFeature(new SupportedTokens($this->serializer->typeMapping));
       $this->context[RemoteObjectMap::CTX_KEY]= new RemoteObjectMap();
       $this->scanner= $scanner;
       $this->cat = Logger::getInstance()->getCategory();

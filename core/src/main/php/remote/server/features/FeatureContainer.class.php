@@ -29,19 +29,17 @@
     /**
      *
      */
-    public function addFeature($name, $feature) {
+    public function addFeature($feature) {
       if (!$feature instanceof EascFeature) {
         return FALSE;
       }
 
       if ($feature->mandatory !== FALSE && $feature->mandatory !== TRUE)
       {
-        throw new Exception('Each feature needs a boolean specifing whether the Feature is mandatory or optional');
+        throw new Exception('Each feature needs a public boolean specifing whether the Feature is mandatory or optional');
       }
       
-      if (!$name instanceof String) {
-        $name = new String($name);
-      }
+      $name = new String($feature->getClass()->getSimpleName());
 
       $this->features->put($name, $feature);
 
@@ -54,6 +52,8 @@
     public function getFeatures() {
       return $this->features;
     }
+
+
 
     /**
      *
