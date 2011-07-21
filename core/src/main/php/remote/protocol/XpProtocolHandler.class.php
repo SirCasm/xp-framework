@@ -137,12 +137,10 @@
         $bcs->buffer
       );
 
-
       // Unserialize the features sent by the server
       $serverFeatures = $this->serializer->valueOf($bcs);
 
       $this->checkFeatures($serverFeatures); 
-      // TODO: Handle Features here and send REMOTE_MSG_FEAT_USED
        
       // Reset default socket timeout
       $this->_sock->setOption(SOL_SOCKET, SO_RCVTIMEO, array(
@@ -151,18 +149,16 @@
       ));
 
       // The clients features should be adjusted by now.
-      $bytes = $this->serializer->representationOf($this->supportedFeatures->getFeatures());
+      $bytes = new ByteCountedString($this->serializer->representationOf($this->supportedFeatures->getFeatures()));
 
-      $this->cat && $this->cat->infof('<<< Sending following features: "%s"', $bytes);
+      $this->cat && $this->cat->infof('<<< Sending following features: "%s"', $bytes->string);
+
       $this->sendPacket(REMOTE_MSG_FEAT_USED, '', array($bytes)); 
-
     }
    
     /**
      * This method checks the Client's features against the 
-     * servers features.
-     *
-     *
+     * server's features.
      */
     public function checkFeatures($serverFeatures) {
       // Keys from the Server and the client are necessary
@@ -178,10 +174,10 @@
         $serverFeature = $serverFeatures[$key];
         // Both exist means the client will activate the feature
         if($clientFeature && $serverFeature) {
-          $clientFeature->handle($serverFeatures[$key]);
+          $clientFeature->clientCheck($serverFeatures[$key]);
 
         // Client does not support the feature and it's optional server side
-        } elseif (!$clientFeature && $serverFeatures && !$serverFeature->isMandatory()) {
+        } elseif (!$clientFeature && $serverFeature && !$serverFeature->isMandatory()) {
           $this->cat && $this->cat->infof('Optional feature "%s" not supported by Client', $key->toString());
         // Server does not support the feature and it's optional client side
         } elseif (!$serverFeature && $clientFeature && !$clientFeature->isMandatory()) {
@@ -384,6 +380,15 @@
             $this->cat && $this->cat->debug('<<< Response:', addcslashes($message, "\0..\37!@\177..\377"));
             $this->_sock->close();
             throw new RemoteException($message, new Error($message));
+
+          case REMOTE_MSG_FEAT_AVAIL:
+            $data= ByteCountedString::readFrom($this->_sock);
+            $this->cat && $this->cat->infof(
+              '<<< Received Features available: "%s"', 
+              $data
+            );
+
+            break;
 
           default:
             $data= $this->readBytes($header['length']);   // Read all left-over bytes

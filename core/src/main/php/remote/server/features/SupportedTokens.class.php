@@ -1,4 +1,3 @@
-
 <?php
 /* This class is part of the XP framework
  *
@@ -13,12 +12,9 @@
 
   /**
    * SupportedTokens
-   *
-   *
    */
-  class SupportedTokens extends Object implements EascFeature {
+  class SupportedTokens extends EascFeature {
     public 
-      $mandatory = TRUE,
       $tokens = NULL;
 
     public function __construct($tokenArray= NULL) {
@@ -29,34 +25,49 @@
       }
     }
 
-    public function isMandatory() {
-      return is_bool($this->mandatory) ? $this->mandatory :  $this->mandatory->value;
-    }
-
+    /**
+     * Returns the HashSet<String> containing the
+     * tokens
+     */ 
     public function getTokens() {
       return $this->tokens;
     }
 
-    public function handle(EascFeature $feature) {
-      if (!($feature instanceof self)) {
+    /**
+     * Client-side check for the authentication
+     *
+     * @return Boolean
+     */
+    public function clientCheck(EascFeature $serverFeature) {
+      if (!($serverFeature instanceof self)) {
         // TODO: Find better Exception type
         throw new EascFeatureNotSupportedException('Given EascFeature is not of type '.$this->getClass()->getClassName());
       }
 
-      if (!$feature->tokens) {
-        throw new FormatException('SupportedToken must contain a HashSet with Tokens');
+      if (!$serverFeature->tokens) {
+        throw new FormatException('SupportedToken must contain a HashSet<String> of tokens');
       }
       
       $iter = $this->tokens->getIterator();
+
       while ($iter->valid()) {
         $token = $iter->current();
-        if (!$feature->tokens->contains($token)) {
+        if (!$serverFeature->tokens->contains($token)) {
           // TODO: Find better Exception type
           throw new Exception('Unsupported Token found.');
         }
         $token = $iter->next();
       }
       return TRUE;
+    }
+
+    /**
+     * Server-side check for the authentication
+     *
+     * @return Boolean
+     */
+    public function serverCheck(EascFeature $clientFeature) {
+      $clientFeature->clientCheck($this); 
     }
   }
 ?>

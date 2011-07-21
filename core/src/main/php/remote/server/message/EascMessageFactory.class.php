@@ -28,6 +28,7 @@
       self::$handlers[REMOTE_MSG_CALL]= XPClass::forName('remote.server.message.EascCallMessage');
       self::$handlers[REMOTE_MSG_VALUE]= XPClass::forName('remote.server.message.EascValueMessage');
       self::$handlers[REMOTE_MSG_EXCEPTION]= XPClass::forName('remote.server.message.EascExceptionMessage');
+      self::$handlers[REMOTE_MSG_FEAT_USED] = XPClass::forName('remote.server.message.EascFeaturesUsedMessage');
     }
   
     /**
