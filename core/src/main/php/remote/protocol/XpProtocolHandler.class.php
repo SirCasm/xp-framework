@@ -139,8 +139,8 @@
 
       // Unserialize the features sent by the server
       $serverFeatures = $this->serializer->valueOf($bcs);
-
-      $this->checkFeatures($serverFeatures); 
+      $clientFeatures = $this->supportedFeatures->getFeatures();
+      $this->checkFeatures($serverFeatures, $clientFeatures); 
        
       // Reset default socket timeout
       $this->_sock->setOption(SOL_SOCKET, SO_RCVTIMEO, array(
@@ -160,17 +160,17 @@
      * This method checks the Client's features against the 
      * server's features.
      */
-    public function checkFeatures($serverFeatures) {
+    public function checkFeatures($serverFeatures, $clientFeatures) {
       // Keys from the Server and the client are necessary
       $keys = array_unique(
         array_merge(
           $serverFeatures->keys(), 
-          $this->supportedFeatures->getFeatures()->keys()
+          $clientFeatures->keys()
       ));
 
       // Iterate through all features the server offers
       foreach($keys as $key) {
-        $clientFeature = $this->supportedFeatures->features[$key];
+        $clientFeature = $clientFeatures[$key];
         $serverFeature = $serverFeatures[$key];
         // Both exist means the client will activate the feature
         if($clientFeature && $serverFeature) {
@@ -181,7 +181,7 @@
           $this->cat && $this->cat->infof('Optional feature "%s" not supported by Client', $key->toString());
         // Server does not support the feature and it's optional client side
         } elseif (!$serverFeature && $clientFeature && !$clientFeature->isMandatory()) {
-          $this->supportedFeatures->features->remove($key); 
+          $clientFeatures->remove($key); 
           $this->cat && $this->cat->infof('Deactivating the optional feature "%s" on the client', $key->toString());
         } else {
           throw new EascFeatureNotSupportedException('Client does not support the mandatory feature: '.$key->toString());

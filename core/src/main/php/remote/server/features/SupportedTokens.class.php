@@ -67,7 +67,7 @@
      * @return Boolean
      */
     public function serverCheck(EascFeature $clientFeature) {
-      $clientFeature->clientCheck($this); 
+      return $clientFeature->clientCheck($this); 
     }
   }
 ?>
