@@ -37,7 +37,7 @@
      * @param   string string default ''
      */
     public function __construct($string= '') {
-      $this->string= utf8_encode($string);
+      $this->string= $string;
     }
     
     /**
@@ -99,7 +99,7 @@
         $s.= self::readFully($stream, $ctl['length']);
       } while ($ctl['next']);
       
-      return utf8_decode($s);
+      return $s;
     }
   }
 ?>
