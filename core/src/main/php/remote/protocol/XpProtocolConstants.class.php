@@ -14,7 +14,7 @@
   define('REMOTE_MSG_FINALIZE',  0x0003);
   define('REMOTE_MSG_TRAN_OP',   0x0004);
   define('REMOTE_MSG_FEAT_AVAIL',0x0008);
-  define('REMOTE_MSG_FEAT_USED ',0x0009);
+  define('REMOTE_MSG_FEAT_USED' ,0x0009);
   
   // Response messages
   define('REMOTE_MSG_VALUE',     0x0005);
