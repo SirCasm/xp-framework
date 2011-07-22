@@ -5,7 +5,8 @@
  */
 
   uses(
-    'remote.server.features.EascFeature'
+    'remote.server.features.EascFeature',
+    'peer.AuthenticationException'
   );
   
   /**
@@ -15,6 +16,10 @@
     public
       $user= '',
       $password='';
+
+    private
+      $_user,
+      $_password;
 
 
     /**
@@ -40,6 +45,11 @@
       return TRUE;
     }
 
+    public function setServerCredentials($user = '', $password='') {
+      $this->_user = $user;
+      $this->_password = $password;
+    }
+
     /**
      * Server-side check for the authentication
      *
@@ -49,6 +59,18 @@
       if (!($clientFeature instanceof self)) {
         // TODO: Find better Exception type
         throw new Exception('Given EascFeature is not of type '.$this->getClass()->getClassName());
+      }
+      Console::writeLine(
+        sprintf('user: %s pass: %s user: %s pass: %s', $this->_user, $this->_password, $clientFeature->user, $clientFeature->password)
+      );
+      if (
+        $this->_user == $clientFeature->user && 
+        $this->_password == $clientFeature->password) {
+
+        return TRUE;
+
+      } else {
+        throw new AuthenticationException('Wrong user or password given');
       }
     }
   }

@@ -20,7 +20,6 @@
   define('REMOTE_MSG_VALUE',     0x0005);
   define('REMOTE_MSG_EXCEPTION', 0x0006);
   define('REMOTE_MSG_ERROR',     0x0007);
-  define('REMOTE_MSG_CTS',       0x000A);
   
   // Transaction message types
   define('REMOTE_TRAN_BEGIN',    0x0001);

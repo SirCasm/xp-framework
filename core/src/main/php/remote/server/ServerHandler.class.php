@@ -39,7 +39,17 @@
       try {
         $handler= EascMessageFactory::forType($type);
         $handler->handle($protocol, $data);
-        $response= EascMessageFactory::forType(REMOTE_MSG_VALUE);
+
+        $answerType = NULL;
+        switch ($type) {
+          case REMOTE_MSG_FEAT_USED:
+            $answerType = REMOTE_MSG_INIT;
+          break;
+          default:
+            $answerType = REMOTE_MSG_VALUE;
+          break;
+        }
+        $response= EascMessageFactory::forType($answerType);
         $response->setValue($handler->getValue());
 
       } catch (Throwable $e) {

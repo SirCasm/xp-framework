@@ -34,7 +34,6 @@
       $serverFeatures = $protocol->features->getFeatures();
       $clientFeatures = $protocol->serializer->valueOf($data);
       $this->checkFeatures($serverFeatures, $clientFeatures); 
-      Console::writeLine('Check was successful');
     }
 
     /**
@@ -73,6 +72,8 @@
           throw new EascFeatureNotSupportedException('Server cannot support the mandatory feature: '.$key->toString());
         }
       }
+
+      $this->setValue(TRUE);
     }
   }
 ?>

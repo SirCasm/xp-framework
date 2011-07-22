@@ -17,6 +17,7 @@
     'remote.server.message.EascFeaturesAvailableMessage',
     'remote.server.RemoteObjectMap',
     'remote.server.ServerHandler',
+    'util.PropertyManager',
     'util.collections.HashTable',
     'util.log.FileAppender',
     'util.log.Logger'
@@ -44,13 +45,13 @@
     public function __construct($scanner) {
       $this->serializer= new Serializer();
       $this->serializer->mapping('I', new RemoteInterfaceMapping());
-      $this->features = new FeatureContainer();
-      $this->features->addFeature(new SupportedTokens($this->serializer->typeMapping));
       $this->context[RemoteObjectMap::CTX_KEY]= new RemoteObjectMap();
       $this->scanner= $scanner;
       $this->cat = Logger::getInstance()->getCategory();
       $this->cat->withAppender(new FileAppender('/home/rene/devel/easc.log'));
       $this->deployer= new Deployer();
+
+      $this->initializeFeatures();
     }
 
     /**
@@ -69,6 +70,34 @@
         }
       }
       return TRUE; 
+    }
+
+    /**
+     * Initializes the Features on the server.
+     * TODO: Move this to its own class if possible
+     *
+     */
+    public function initializeFeatures() {
+      $this->features = new FeatureContainer();
+      $this->features->addFeature(new SupportedTokens($this->serializer->typeMapping));
+      $props = PropertyManager::getInstance();
+      
+      if ($props->hasProperties('features')) {
+        $featureProps = $props->getProperties('features');      
+      }
+
+      if ($featureProps->hasSection('Authentication')) {
+        $credentials= $featureProps->readSection('Authentication');
+        if (!$credentials['user'] || !$credentials['password'])
+        {
+          throw new EascFeatureNotSupportedException('There was no user or password for the AuthenticationFeature supplied.');
+        }
+        // The Password is not written to the class to avoid sending
+        // it over the wire
+        $auth = new AuthenticationFeature();
+        $auth->setServerCredentials($credentials['user'], $credentials['password']);
+        $this->features->addFeature($auth);
+      }
     }
 
     /**

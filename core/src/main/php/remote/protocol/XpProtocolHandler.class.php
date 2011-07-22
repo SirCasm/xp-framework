@@ -390,6 +390,12 @@
 
             break;
 
+          case REMOTE_MSG_INIT:
+            $data= ByteCountedString::readFrom($this->_sock);
+            $this->cat && $this->cat->debug('<<< Response:', addcslashes($data, "\0..\37!@\177..\377"));
+            return $this->serializer->valueOf(new SerializedData($data), $ctx);
+
+
           default:
             $data= $this->readBytes($header['length']);   // Read all left-over bytes
             $this->cat && $this->cat->debug('<<< Response:', addcslashes($data, "\0..\37!@\177..\377"));
