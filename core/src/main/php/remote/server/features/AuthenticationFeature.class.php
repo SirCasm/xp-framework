@@ -21,7 +21,6 @@
       $_user,
       $_password;
 
-
     /**
      * Constructor
      */
@@ -44,7 +43,12 @@
 
       return TRUE;
     }
-
+    
+    /**
+     * Write the server's credentials to the private members _user
+     * and _password. This is necessary so they won't get sent over
+     * the wire.
+     */
     public function setServerCredentials($user = '', $password='') {
       $this->_user = $user;
       $this->_password = $password;

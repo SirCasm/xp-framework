@@ -43,9 +43,7 @@
       $this->cat->infof('Data %s', xp::stringOf($data));
       $args= $protocol->serializer->valueOf($data, $protocol->context);
       $arguments = array();
-      foreach ($args->values->keys() as $key) {
-        $arguments[] = $args->values[$key]; 
-      }
+      $arguments[] = $args->elements(); 
       $this->cat->infof('arguments %s method %s', xp::stringOf($arguments), xp::stringOf(array($p, $method)));
       $this->setValue(call_user_func_array(array($p, $method), $arguments));
     }

@@ -16,6 +16,7 @@
     'remote.server.features.FeatureContainer',
     'remote.server.features.EascFeatureNotSupportedException',
     'remote.server.features.SupportedTokens',
+    'util.collections.Vector',
     'util.log.ConsoleAppender'
   );
 
@@ -293,12 +294,17 @@
         $method,
         $this->stringOf($args)
       );
+      $argContainer = create('new Vector<Object>');
+      foreach ($args as $arg) {
+       $argContainer->add(Primitive::boxed($arg)); 
+      }
+
       $r= $this->sendPacket(
         REMOTE_MSG_CALL, 
         pack('NN', 0, $oid),
         array(
           new ByteCountedString($method),
-          new ByteCountedString($this->serializer->representationOf(ArrayList::newInstance($args)))
+          new ByteCountedString($this->serializer->representationOf($argContainer))
         )
       );
       $this->cat && $this->cat->infof('<<< %s', $this->stringOf($r));

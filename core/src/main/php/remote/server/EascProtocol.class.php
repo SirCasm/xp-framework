@@ -75,7 +75,6 @@
     /**
      * Initializes the Features on the server.
      * TODO: Move this to its own class if possible
-     *
      */
     public function initializeFeatures() {
       $this->features = new FeatureContainer();
@@ -199,6 +198,7 @@
      * @param   peer.Socket socket
      */
     public function handleConnect($socket) {
+      $this->initializeFeatures();
       $message = new EascFeaturesAvailableMessage();
       $message->setValue($this->features->getFeatures());
       $this->answerWithMessage($socket, $message); 
